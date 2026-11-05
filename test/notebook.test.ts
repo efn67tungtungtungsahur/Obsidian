@@ -88,12 +88,24 @@ async function main() {
   const dir = mkdtempSync(join(tmpdir(), "nbpdf-"));
   const pdfPath = join(dir, "test.pdf");
   writeFileSync(pdfPath, pdf);
-  const info = execFileSync("python3", ["-I", "-c", "import sys,pypdf; r=pypdf.PdfReader(sys.argv[1], strict=True); print(len(r.pages), [round(float(p.mediabox.height)) for p in r.pages], list(r.pages[0]['/Resources']['/XObject'].keys()))", pdfPath]).toString().trim();
-  assert.equal(info, "2 [842, 420] ['/Im0']");
-  const pdfinfo = execFileSync("pdfinfo", [pdfPath]).toString();
-  assert.match(pdfinfo, /Pages:\s+2/);
-  assert.doesNotMatch(execFileSync("pdfinfo", [pdfPath], { stdio: ["ignore", "pipe", "pipe"] }).toString(), /Syntax Error/i);
-  console.log("ok PDF export structure (pypdf strict + pdfinfo)");
+  // Self-contained check: every xref offset points exactly at "N 0 obj".
+  const text = Buffer.from(pdf).toString("latin1");
+  const xrefAt = Number(/startxref\n(\d+)/.exec(text)![1]);
+  const rows = text.slice(xrefAt).split("\n").slice(3).filter((l) => / 00000 n $/.test(l));
+  assert.equal(rows.length, 8, "catalog, pages tree and 3 objects per page");
+  rows.forEach((row, i) => assert.equal(text.slice(Number(row.slice(0, 10)), Number(row.slice(0, 10)) + `${i + 1} 0 obj`.length), `${i + 1} 0 obj`));
+  const checks = ["xref offsets"];
+  const has = (cmd: string, args: string[]) => { try { execFileSync(cmd, args, { stdio: "ignore" }); return true; } catch { return false; } };
+  if (has("python3", ["-I", "-c", "import pypdf"])) {
+    const info = execFileSync("python3", ["-I", "-c", "import sys,pypdf; r=pypdf.PdfReader(sys.argv[1], strict=True); print(len(r.pages), [round(float(p.mediabox.height)) for p in r.pages], list(r.pages[0]['/Resources']['/XObject'].keys()))", pdfPath]).toString().trim();
+    assert.equal(info, "2 [842, 420] ['/Im0']");
+    checks.push("pypdf strict");
+  }
+  if (has("pdfinfo", ["-v"])) {
+    assert.match(execFileSync("pdfinfo", [pdfPath]).toString(), /Pages:\s+2/);
+    checks.push("pdfinfo");
+  }
+  console.log(`ok PDF export structure (${checks.join(" + ")})`);
 
   // ---------- GoodNotes ZIP import ----------
   assert.ok(wantedZipEntry("Uni/Bio/Zelle.pdf"));
