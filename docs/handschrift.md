@@ -1,6 +1,8 @@
 # Obsidian wie GoodNotes nutzen: handschriftlich schreiben
 
-**Kurz gesagt:** Obsidian ist eine Text-App. Handschrift kann es nicht von sich aus, Plugins rüsten sie nach. Mit einem iPad und Apple Pencil (oder einem Android-Tablet mit Stift) kommst du damit gut an GoodNotes heran. Ein paar Unterschiede bleiben (siehe [Ehrlicher Vergleich](#ehrlicher-vergleich-mit-goodnotes)).
+**Kurz gesagt:** Obsidian ist eine Text-App. Handschrift kann es nicht von sich aus, Plugins rüsten sie nach. Mit einem Tablet mit Stift, also einem **Samsung Galaxy Tab mit S Pen** oder einem iPad mit Apple Pencil, kommst du damit gut an GoodNotes heran.
+
+> **Galaxy Tab S9?** Die Schritt-für-Schritt-Einrichtung für das Tab S9 steht in [tab-s9.md](tab-s9.md). Ein paar Unterschiede bleiben (siehe [Ehrlicher Vergleich](#ehrlicher-vergleich-mit-goodnotes)).
 Der große Vorteil: Mit dem Plugin **Claude Research** wird deine Handschrift **durchsuchbar, verlinkbar und recherchierbar**.
 
 ---
@@ -11,8 +13,8 @@ Der große Vorteil: Mit dem Plugin **Claude Research** wird deine Handschrift **
 |---|---|---|
 | **1. Excalidraw-Plugin** | Mitschriften, Skizzen, Mindmaps, Diagramme | Unendliche Leinwand, Stift-Modus mit Handballen-Erkennung |
 | **2. Ink-Plugin** | Handschrift *mitten im Text* einer Notiz | Schreibzeilen direkt zwischen getipptem Text, sehr „Notizbuch-artig“ |
-| **3. Scribble (iPad)** | Handschrift sofort in getippten Text umwandeln | Mit dem Pencil in jedes Textfeld schreiben, iPadOS wandelt es um |
-| **4. GoodNotes behalten + PDF-Export** | Wer GoodNotes weiter nutzen will | In GoodNotes schreiben, PDF in den Vault exportieren, Claude transkribiert |
+| **3. S Pen zu Text (Samsung) / Scribble (iPad)** | Handschrift sofort in getippten Text umwandeln | Mit dem Stift in jedes Textfeld schreiben, das System wandelt es um |
+| **4. GoodNotes oder Samsung Notes behalten + PDF-Export** | Wer seine Schreib-App weiter nutzen will | Dort schreiben, PDF in den Vault exportieren, Claude transkribiert |
 | **5. Foto / Scan von Papier** | Echte Papier-Notizen, Tafelbilder | Foto in die Notiz ziehen, Claude transkribiert |
 
 Alle fünf Wege funktionieren mit dem Befehl **„Handschrift der aktuellen Notiz transkribieren“** und mit dem Häkchen **„Aktuelle Notiz mitschicken“** im Claude-Chat.
@@ -23,7 +25,7 @@ Alle fünf Wege funktionieren mit dem Befehl **„Handschrift der aktuellen Noti
 
 1. *Einstellungen → Community-Plugins → Durchsuchen* → **Excalidraw** (von Zsolt Viczián) installieren und aktivieren.
 2. Neue Zeichnung anlegen: über das Excalidraw-Symbol in der linken Leiste, über die Befehlspalette (Befehle beginnen mit „Excalidraw: Create new drawing …“) oder per Rechtsklick auf einen Ordner.
-3. Auf dem iPad den **Stift-Modus** einschalten (Stift-Symbol in der Werkzeugleiste). Dann zeichnet nur der Pencil, und die Finger scrollen und zoomen. Das ist wie in GoodNotes.
+3. Den **Stift-Modus** einschalten (Stift-Symbol in der Werkzeugleiste). Dann zeichnet nur der Stift (S Pen oder Apple Pencil), und die Finger scrollen und zoomen. Das ist wie in GoodNotes.
 4. Zeichnungen bettest du in normale Notizen ein: `![[Meine Skizze.excalidraw]]`.
 
 **Wichtig für Claude:** Schalte in den Excalidraw-Einstellungen unter *Export* die Option **„Auto-export PNG“** ein. Dann legt Excalidraw neben jeder Zeichnung automatisch ein PNG ab, und das Plugin schickt dieses Bild an Claude.
@@ -42,17 +44,21 @@ Tipps:
 Ink speichert die Handschrift als `.writing`-Datei mit einer eingebauten Vorschau. Das Plugin erkennt die Ink-Blöcke in einer Notiz und schickt diese Vorschau an Claude.
 Hat eine Datei noch keine Vorschau, öffne sie einmal kurz in Ink und bearbeite sie.
 
-## 3. Scribble auf dem iPad: Handschrift → Text, ohne Plugin
+> Ink ist vor allem für das iPad entwickelt und noch jung. Auf Android-Tablets wie dem Galaxy Tab ist **Excalidraw** die erprobtere Wahl. Probier Ink ruhig aus, verlass dich aber nicht darauf.
 
-Unter iPadOS kannst du mit dem Apple Pencil **in jedes Textfeld handschriftlich schreiben**. Die Schrift wird sofort in getippten Text umgewandelt, Deutsch wird unterstützt (*Einstellungen → Apple Pencil → Handschrift*).
-Das funktioniert im Obsidian-Editor und auch im **Eingabefeld des Claude-Chats**. Du kannst Claude also handschriftlich Fragen stellen.
+## 3. Handschrift → Text im Textfeld, ohne Plugin
 
-## 4. GoodNotes weiter nutzen und mit Obsidian verbinden
+- **Samsung Galaxy Tab („S Pen zu Text“):** Halte den S Pen über ein Textfeld und tippe auf das Handschrift-Symbol. Die Tastatur wird dann durch eine Schreibfläche ersetzt, und deine Schrift wird zu getipptem Text. Die Funktion ist ab Werk aktiv und lässt sich in den S-Pen-Einstellungen ein- und ausschalten.
+- **iPad (Scribble):** Mit dem Apple Pencil direkt in jedes Textfeld schreiben (*Einstellungen → Apple Pencil → Handschrift*).
 
-Wenn du an GoodNotes hängst, musst du nicht umsteigen:
+Beides funktioniert im Obsidian-Editor und auch im **Eingabefeld des Claude-Chats**. Du kannst Claude also handschriftlich Fragen stellen.
 
-1. In GoodNotes: Notizbuch oder Seite → *Teilen → Exportieren → PDF*.
-2. Die PDF in den Vault-Ordner speichern, zum Beispiel `GoodNotes/` (in der Dateien-App, wenn der Vault in iCloud liegt).
+## 4. GoodNotes oder Samsung Notes weiter nutzen und mit Obsidian verbinden
+
+Wenn du an deiner Schreib-App hängst, musst du nicht umsteigen:
+
+1. Die Seite oder das Notizbuch als **PDF exportieren**. In GoodNotes geht das über *Teilen → Exportieren → PDF*, in Samsung Notes über das Menü der Notiz (als Datei speichern bzw. teilen → PDF).
+2. Die PDF in den Vault-Ordner speichern, zum Beispiel in den Unterordner `Handschrift/`. Auf Android liegt der Vault meist unter `Dokumente/<Vault-Name>`, auf dem iPad in der Dateien-App.
 3. In einer Obsidian-Notiz einbetten: `![[Vorlesung 3.pdf]]`.
 4. Befehl **„Handschrift transkribieren“**. Claude liest die PDF-Seiten und schreibt den Text als Callout unter die Notiz.
 

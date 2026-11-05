@@ -8,6 +8,9 @@ Ein Obsidian-Plugin, das **Claude direkt in Obsidian** bringt:
 - **Handschrift lesen.** Handschriftliche Notizen aus Excalidraw, Ink, Fotos, Scans oder GoodNotes-PDFs werden transkribiert und dadurch durchsuchbar. Du kannst auch Fragen zu ihnen stellen.
 - **Ergebnisse übernehmen.** Antworten fügst du per Klick in die Notiz ein, ganze Recherchen speicherst du als eigene Notiz.
 
+> **Samsung Galaxy Tab S9?** Die Einrichtung von der Installation bis zur ersten
+> handschriftlichen Notiz steht in [docs/tab-s9.md](docs/tab-s9.md).
+>
 > Neu bei Obsidian oder du suchst den GoodNotes-Ersatz? Lies zuerst
 > [docs/handschrift.md](docs/handschrift.md). Andere Wege, Claude mit Obsidian zu verbinden
 > (Claude-App, MCP, Claude Code), stehen in [docs/alternativen.md](docs/alternativen.md).
@@ -31,7 +34,7 @@ Wie in GoodNotes handschriftlich in Obsidian schreiben? Das geht mit Plugins, si
 
 ### Voraussetzungen
 
-1. **Obsidian 1.11.4 oder neuer** (Desktop oder Mobil).
+1. **Obsidian 1.11.4 oder neuer** (Desktop oder Mobil, auch Android-Tablets wie das Galaxy Tab S9, siehe [docs/tab-s9.md](docs/tab-s9.md)).
 2. **Ein Anthropic-API-Schlüssel.** Den erstellst du unter [console.anthropic.com](https://console.anthropic.com) → *API Keys*. Dort lädst du auch Guthaben auf.
    **Wichtig:** Ein Claude-Pro- oder Max-Abo (claude.ai) enthält **keine** API-Nutzung. Die API wird getrennt nach Verbrauch abgerechnet. Mehr dazu unter [Kosten](#kosten).
 
