@@ -43,12 +43,24 @@ export function isVisualFile(app: App, file: TFile): boolean {
  */
 export async function collectAttachments(app: App, file: TFile): Promise<CollectedAttachments> {
   const result: CollectedAttachments = { blocks: [], labels: [], skipped: [] };
+  const { targets, skipped } = await visualTargets(app, file);
+  result.skipped.push(...skipped);
 
-  if (isVisualFile(app, file)) {
-    await addFile(app, file, result);
-    return result;
+  for (const target of targets) {
+    if (result.blocks.length >= MAX_ATTACHMENTS) {
+      result.skipped.push(`${target.name} (mehr als ${MAX_ATTACHMENTS} Anhänge)`);
+      continue;
+    }
+    await addFile(app, target, result);
   }
-  if (file.extension !== "md") return result;
+  return result;
+}
+
+/** The visual files of `file`: the file itself if it is one, else its embeds and Ink blocks. */
+async function visualTargets(app: App, file: TFile): Promise<{ targets: TFile[]; skipped: string[] }> {
+  const skipped: string[] = [];
+  if (isVisualFile(app, file)) return { targets: [file], skipped };
+  if (file.extension !== "md") return { targets: [], skipped };
 
   const targets: TFile[] = [];
   const seen = new Set<string>();
@@ -69,18 +81,39 @@ export async function collectAttachments(app: App, file: TFile): Promise<Collect
       const data = JSON.parse(m[1]) as { filepath?: unknown };
       if (typeof data.filepath === "string") push(app.vault.getFileByPath(data.filepath));
     } catch {
-      result.skipped.push("Ink-Block mit ungültigem Inhalt");
+      skipped.push("Ink-Block mit ungültigem Inhalt");
     }
   }
+  return { targets: targets.filter((t) => isVisualFile(app, t)), skipped };
+}
 
-  for (const target of targets) {
-    if (result.blocks.length >= MAX_ATTACHMENTS) {
-      result.skipped.push(`${target.name} (mehr als ${MAX_ATTACHMENTS} Anhänge)`);
-      continue;
+export interface ManualAttachments {
+  /** Vault paths of files the user can attach in the Claude app as they are. */
+  paths: string[];
+  /** Visual content that cannot be attached directly, with what to do instead. */
+  hints: string[];
+}
+
+/**
+ * For use without the API: which files of `file` the user should attach by hand in the
+ * Claude app. Excalidraw drawings map to their auto-exported PNG; Ink files have no
+ * attachable image file.
+ */
+export async function listManualAttachments(app: App, file: TFile): Promise<ManualAttachments> {
+  const { targets, skipped } = await visualTargets(app, file);
+  const out: ManualAttachments = { paths: [], hints: [...skipped] };
+  for (const t of targets) {
+    const ext = t.extension.toLowerCase();
+    if (ext in IMAGE_MIME || ext === "pdf") out.paths.push(t.path);
+    else if (isExcalidraw(app, t)) {
+      const png = excalidrawExportFile(app, t);
+      if (png) out.paths.push(png.path);
+      else out.hints.push(`${t.name}: kein PNG vorhanden – in Excalidraw „Auto-export PNG“ einschalten oder einen Screenshot anhängen`);
+    } else {
+      out.hints.push(`${t.name} (Ink): Screenshot der Handschrift machen und anhängen`);
     }
-    if (isVisualFile(app, target)) await addFile(app, target, result);
   }
-  return result;
+  return out;
 }
 
 async function addFile(app: App, file: TFile, out: CollectedAttachments): Promise<void> {
@@ -172,14 +205,21 @@ function dataUriToBuffer(uri: string): { data: ArrayBuffer; mime: ImageMime } | 
  * PNG of an Excalidraw drawing: first the file written by Excalidraw's "Auto-export PNG"
  * setting next to the drawing, then (best effort) the Excalidraw plugin's scripting API.
  */
-async function excalidrawPng(app: App, file: TFile): Promise<ArrayBuffer | null> {
+/** The PNG that Excalidraw's "Auto-export PNG" setting writes next to a drawing, if any. */
+function excalidrawExportFile(app: App, file: TFile): TFile | null {
   const folder = file.parent && file.parent.path !== "/" ? file.parent.path + "/" : "";
   const stem = file.basename; // "Skizze.excalidraw" for "Skizze.excalidraw.md"
   const candidates = [`${stem}.png`, `${stem.replace(/\.excalidraw$/, "")}.png`, `${stem}.dark.png`, `${stem}.light.png`];
   for (const name of candidates) {
     const png = app.vault.getFileByPath(folder + name);
-    if (png) return app.vault.readBinary(png);
+    if (png) return png;
   }
+  return null;
+}
+
+async function excalidrawPng(app: App, file: TFile): Promise<ArrayBuffer | null> {
+  const exported = excalidrawExportFile(app, file);
+  if (exported) return app.vault.readBinary(exported);
 
   // Excalidraw exposes ExcalidrawAutomate for scripts; its API is not part of Obsidian's,
   // so everything here is guarded and failures fall back to the auto-export hint.

@@ -1,6 +1,11 @@
 # Claude Research für Obsidian
 
-Ein Obsidian-Plugin, das **Claude direkt in Obsidian** bringt:
+Ein Obsidian-Plugin, das **Claude in Obsidian** bringt. Es hat zwei Modi:
+
+- **Ohne API (Standard):** Das Plugin bereitet deine Frage samt Notiz, passenden Notizen und Recherche-Auftrag vor und öffnet die Claude-App bzw. claude.ai. Claude antwortet mit **deinem eigenen Claude-Konto** (kostenlos oder Abo), ohne API-Schlüssel und ohne Extrakosten. Die Antwort übernimmst du mit einem Tipp in die Notiz.
+- **Mit API-Schlüssel (optional):** Alles läuft direkt in Obsidian, wie unten beschrieben. Das wird pro Nutzung abgerechnet.
+
+Funktionen (im API-Modus vollständig in Obsidian, ohne API über die Claude-App):
 
 - **Chat in der Seitenleiste.** Fragen stellen, ohne Obsidian zu verlassen.
 - **Web-Recherche mit Quellen.** Claude sucht im Internet, liest Webseiten und belegt Aussagen mit nummerierten Links und einer Quellenliste.
@@ -35,8 +40,9 @@ Wie in GoodNotes handschriftlich in Obsidian schreiben? Das geht mit Plugins, si
 ### Voraussetzungen
 
 1. **Obsidian 1.11.4 oder neuer** (Desktop oder Mobil, auch Android-Tablets wie das Galaxy Tab S9, siehe [docs/tab-s9.md](docs/tab-s9.md)).
-2. **Ein Anthropic-API-Schlüssel.** Den erstellst du unter [console.anthropic.com](https://console.anthropic.com) → *API Keys*. Dort lädst du auch Guthaben auf.
-   **Wichtig:** Ein Claude-Pro- oder Max-Abo (claude.ai) enthält **keine** API-Nutzung. Die API wird getrennt nach Verbrauch abgerechnet. Mehr dazu unter [Kosten](#kosten).
+2. **Ohne API (Standard):** ein Claude-Konto und die Claude-App bzw. claude.ai im Browser. Sonst nichts.
+3. **Nur für den API-Modus:** ein Anthropic-API-Schlüssel von [console.anthropic.com](https://console.anthropic.com) → *API Keys*. Dort lädst du auch Guthaben auf.
+   **Wichtig:** Ein Claude-Pro- oder Max-Abo enthält **keine** API-Nutzung. Die API wird getrennt nach Verbrauch abgerechnet. Mehr dazu unter [Kosten](#kosten).
 
 ### Variante A: über BRAT (am einfachsten, auch auf dem iPad)
 
@@ -58,9 +64,9 @@ Wie in GoodNotes handschriftlich in Obsidian schreiben? Das geht mit Plugins, si
 2. Im Vault den Ordner `.obsidian/plugins/claude-research/` anlegen und die drei Dateien hineinkopieren.
 3. Obsidian neu laden und unter *Community-Plugins* **Claude Research** aktivieren.
 
-### API-Schlüssel eintragen
+### API-Schlüssel eintragen (nur API-Modus)
 
-*Einstellungen → Claude Research → Anthropic-API-Schlüssel*: einen neuen Eintrag anlegen und den Schlüssel einfügen.
+*Einstellungen → Claude Research → Modus: „Mit API-Schlüssel“*, dann *Anthropic-API-Schlüssel*: einen neuen Eintrag anlegen und den Schlüssel einfügen.
 Der Schlüssel liegt im **Schlüsselspeicher von Obsidian** (SecretStorage). Er steht nicht in den Plugin-Daten, die mit deinem Vault synchronisiert werden.
 
 ---
@@ -107,6 +113,9 @@ Im Chat siehst du live, was Claude gerade tut, zum Beispiel *„Web-Suche: …�
 
 ## Kosten
 
+**Ohne API:** keine Kosten durch das Plugin. Es gelten die Limits deines Claude-Kontos (kostenlos oder Abo).
+
+**Mit API:**
 Die API rechnet nach **Tokens** ab (grob 1 Token ≈ ¾ Wort). Web-Suchen kosten zusätzlich pro Suche. Aktuelle Preise stehen auf [anthropic.com/pricing](https://www.anthropic.com/pricing).
 
 Grobe Richtwerte:

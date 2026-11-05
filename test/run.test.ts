@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { Conversation, renderAnswer, describeError } from "../src/claude";
-import { collectAttachments } from "../src/attachments";
+import { collectAttachments, listManualAttachments } from "../src/attachments";
+import { buildPrompt, preparePrompt } from "../src/appBridge";
 import { DEFAULT_SETTINGS } from "../src/settings";
 import { TFile } from "obsidian";
 
@@ -235,6 +236,33 @@ async function main() {
   assert.match(describeError(authErr), /API-Schlüssel ist ungültig/);
   assert.equal(mobile.messages.length, before8);
   console.log("ok mobile compat fallback");
+
+  // 9) Without API: prompt for the Claude app (note text, related notes, attachments, web)
+  const manual = await listManualAttachments(vapp, vfiles[0]);
+  assert.deepEqual(manual.paths, ["Bilder/tafel.jpg", "GoodNotes/Vorlesung 3.pdf", "Zeichnungen/Skizze.excalidraw.png"]);
+  assert.equal(manual.hints.length, 2);
+  assert.match(manual.hints.join("|"), /Ohne Export.*Auto-export PNG/);
+  assert.match(manual.hints.join("|"), /notiz\.writing \(Ink\): Screenshot/);
+
+  const plain = buildPrompt({ question: "Was ist ATP?", web: false });
+  assert.match(plain, /^Ich arbeite mit Obsidian/);
+  assert.ok(!plain.includes("Recherchiere"), "no web instruction when web is off");
+  assert.match(plain, /Meine Frage:\nWas ist ATP\?$/);
+
+  const mixedApp = { ...vapp, vault: { ...vapp.vault, getMarkdownFiles: () => files }, metadataCache: { ...vapp.metadataCache, getFileCache: (f: TFile) => (files.includes(f) ? {} : vapp.metadataCache.getFileCache(f)) } };
+  const prepared = await preparePrompt(mixedApp, { ...DEFAULT_SETTINGS, extraInstructions: "Biologie-Studium" }, "Photosynthese Chlorophyll", {
+    file: vfiles[0], includeNote: true, web: true, related: true,
+  });
+  assert.match(prepared.prompt, /Recherchiere dafür im Web/);
+  assert.match(prepared.prompt, /Hinweise zu mir: Biologie-Studium/);
+  assert.match(prepared.prompt, /Meine aktuelle Notiz „Mitschrift“:\n<notiz>\nText/);
+  assert.match(prepared.prompt, /<ausschnitte>\n1\. Uni\/Biologie\/Photosynthese\.md/);
+  assert.match(prepared.prompt, /3 Dateien aus meiner Notiz an .*tafel\.jpg, Vorlesung 3\.pdf, Skizze\.excalidraw\.png/);
+  assert.deepEqual(prepared.attachments, manual.paths);
+  // Without the note toggle nothing from the note leaks into the prompt
+  const bare = await preparePrompt(mixedApp, { ...DEFAULT_SETTINGS }, "Frage", { file: vfiles[0], includeNote: false, web: false, related: false });
+  assert.ok(!bare.prompt.includes("<notiz>") && !bare.prompt.includes("anhängen") && bare.attachments.length === 0);
+  console.log("ok app mode prompt");
 }
 
 main().catch((e) => {

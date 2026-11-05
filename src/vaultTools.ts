@@ -106,7 +106,7 @@ function countOccurrences(haystack: string, needle: string, cap: number): number
 }
 
 /** Keyword search: every query word that occurs counts, title hits weigh more. */
-async function searchVault(app: App, query: string, limit: number): Promise<string> {
+export async function searchVault(app: App, query: string, limit: number): Promise<string> {
   const words = tokenize(query);
   if (!words.length) return "No usable keywords in the query.";
 

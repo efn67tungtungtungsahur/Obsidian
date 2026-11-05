@@ -17,3 +17,5 @@ export class SecretComponent {}
 export class Setting {}
 export const Platform = { isMobile: false };
 export function requestUrl(p: unknown) { return (globalThis as any).__requestUrl(p); }
+export class Modal { constructor(public app: unknown) {} open() {} close() {} setTitle() { return this; } }
+export class MarkdownView {}

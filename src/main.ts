@@ -1,5 +1,6 @@
 import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
-import { isVisualFile } from "./attachments";
+import { buildPrompt, openInClaude, PasteAnswerModal, TRANSCRIBE_PROMPT } from "./appBridge";
+import { isVisualFile, listManualAttachments } from "./attachments";
 import { ClaudeChatView, VIEW_TYPE_CLAUDE } from "./chatView";
 import { ClaudeResearchSettingTab, ClaudeResearchSettings, DEFAULT_SETTINGS } from "./settings";
 import { transcribeFile } from "./transcribe";
@@ -8,6 +9,8 @@ export default class ClaudeResearchPlugin extends Plugin {
   settings: ClaudeResearchSettings = { ...DEFAULT_SETTINGS };
   /** The last focused Markdown editor; the chat sidebar takes focus, so it is tracked here. */
   lastMarkdownView: MarkdownView | null = null;
+  /** Last question handed to the Claude app; becomes the title when the answer is saved. */
+  lastAppQuestion = "";
   private lastFile: TFile | null = null;
 
   async onload(): Promise<void> {
@@ -54,9 +57,15 @@ export default class ClaudeResearchPlugin extends Plugin {
       checkCallback: (checking) => {
         const file = this.app.workspace.getActiveFile();
         if (!file) return false;
-        if (!checking) void transcribeFile(this.app, this.settings, this.getApiKey(), file);
+        if (!checking) void this.transcribe(file);
         return true;
       },
+    });
+
+    this.addCommand({
+      id: "paste-answer",
+      name: "Claude-Antwort einfügen",
+      callback: () => this.openPasteModal(),
     });
 
     // Right-click on selected text in a note.
@@ -81,7 +90,7 @@ export default class ClaudeResearchPlugin extends Plugin {
           item
             .setTitle("Handschrift mit Claude transkribieren")
             .setIcon("pen-tool")
-            .onClick(() => void transcribeFile(this.app, this.settings, this.getApiKey(), file)),
+            .onClick(() => void this.transcribe(file)),
         );
       }),
     );
@@ -134,10 +143,41 @@ export default class ClaudeResearchPlugin extends Plugin {
   }
 
   private async researchSelection(selection: string): Promise<void> {
+    const question = `Recherchiere gründlich zu folgendem Text aus meiner Notiz. Erkläre die Kernaussagen, prüfe Fakten und ergänze wichtige Hintergründe mit Quellen:\n\n> ${selection.replace(/\n/g, "\n> ")}`;
+    if (this.settings.mode === "app") {
+      // Build the prompt synchronously so the clipboard write still counts as part of the tap.
+      this.lastAppQuestion = `Recherche: ${selection.slice(0, 50)}`;
+      await openInClaude(this.app, buildPrompt({ question, web: true, extraInstructions: this.settings.extraInstructions }));
+      return;
+    }
     const view = await this.openChat();
-    await view?.ask(
-      `Recherchiere gründlich zu folgendem Text aus meiner Notiz. Erkläre die Kernaussagen, prüfe Fakten und ergänze wichtige Hintergründe mit Quellen:\n\n> ${selection.replace(/\n/g, "\n> ")}`,
-      { includeNote: false },
-    );
+    await view?.ask(question, { includeNote: false });
+  }
+
+  /** API mode: transcribe directly. App mode: hand the files to the Claude app. */
+  private async transcribe(file: TFile): Promise<void> {
+    if (this.settings.mode === "api") {
+      await transcribeFile(this.app, this.settings, this.getApiKey(), file);
+      return;
+    }
+    const { paths, hints } = await listManualAttachments(this.app, file);
+    if (!paths.length) {
+      const why = hints.length ? ` ${hints.join("; ")}` : "";
+      new Notice(`Keine Bilder oder PDFs zum Anhängen in „${file.basename}“ gefunden.${why}`, 12000);
+      return;
+    }
+    this.lastAppQuestion = `Transkription ${file.basename}`;
+    await openInClaude(this.app, TRANSCRIBE_PROMPT, paths, hints);
+  }
+
+  openPasteModal(): void {
+    new PasteAnswerModal(this.app, this.settings, { view: this.lastMarkdownView, file: this.lastActiveFile() }, this.lastAppQuestion).open();
+  }
+
+  /** Re-renders open chat panels, e.g. after switching between app and API mode. */
+  refreshViews(): void {
+    for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_CLAUDE)) {
+      if (leaf.view instanceof ClaudeChatView) leaf.view.render();
+    }
   }
 }

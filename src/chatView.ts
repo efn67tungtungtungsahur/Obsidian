@@ -1,5 +1,6 @@
 import type { BetaContentBlockParam } from "@anthropic-ai/sdk/resources/beta/messages/messages";
 import { Component, ItemView, MarkdownRenderer, Notice, Platform, TFile, WorkspaceLeaf, normalizePath, setIcon } from "obsidian";
+import { openInClaude, preparePrompt } from "./appBridge";
 import { collectAttachments } from "./attachments";
 import { Conversation, describeError } from "./claude";
 import type ClaudeResearchPlugin from "./main";
@@ -23,6 +24,7 @@ export class ClaudeChatView extends ItemView {
   private stopBtn!: HTMLButtonElement;
   private webToggle!: HTMLInputElement;
   private noteToggle!: HTMLInputElement;
+  private relatedToggle: HTMLInputElement | null = null;
 
   constructor(leaf: WorkspaceLeaf, private plugin: ClaudeResearchPlugin) {
     super(leaf);
@@ -41,9 +43,22 @@ export class ClaudeChatView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
+    this.render();
+  }
+
+  /** Builds the panel for the current mode; called again when the mode is changed in settings. */
+  render(): void {
+    this.conversation?.abort();
+    this.conversation = null;
+    this.transcript = [];
+    this.busy = false;
     const root = this.contentEl;
     root.empty();
     root.addClass("claude-research");
+    if (this.plugin.settings.mode === "app") {
+      this.renderAppMode(root);
+      return;
+    }
 
     const header = root.createDiv({ cls: "claude-header" });
     header.createSpan({ cls: "claude-title", text: "Claude-Recherche" });
@@ -78,8 +93,65 @@ export class ClaudeChatView extends ItemView {
     this.stopBtn.addEventListener("click", () => this.conversation?.abort());
     this.stopBtn.hide();
 
-    this.addChild(this.chatComponent);
+    this.removeChild(this.chatComponent);
+    this.chatComponent = this.addChild(new Component());
     this.showWelcome();
+  }
+
+  /** Without API key: prepare the question here, answer in the Claude app, paste it back. */
+  private renderAppMode(root: HTMLElement): void {
+    const header = root.createDiv({ cls: "claude-header" });
+    header.createSpan({ cls: "claude-title", text: "Claude (ohne API)" });
+
+    const body = root.createDiv({ cls: "claude-messages" });
+    const steps = body.createEl("ol", { cls: "claude-welcome" });
+    steps.createEl("li", { text: "Frage unten eingeben (tippen oder mit dem S Pen schreiben) und „In Claude öffnen“ tippen." });
+    steps.createEl("li", { text: "Die Frage ist kopiert und Claude öffnet sich. Ins Eingabefeld lange tippen → „Einfügen“ → senden. Für Recherche in Claude die Websuche einschalten." });
+    steps.createEl("li", { text: "Unter Claudes Antwort auf „Kopieren“ tippen, zurück zu Obsidian und „Antwort einfügen“." });
+    body.createEl("p", {
+      cls: "claude-welcome",
+      text: "Läuft über dein eigenes Claude-Konto (kostenlos oder Abo) – kein API-Schlüssel, keine Extrakosten.",
+    });
+
+    const options = root.createDiv({ cls: "claude-options" });
+    this.noteToggle = this.checkbox(options, "Aktuelle Notiz mitschicken", this.plugin.settings.includeNoteByDefault);
+    this.webToggle = this.checkbox(options, "Web-Recherche mit Quellen", this.plugin.settings.webSearch);
+    this.relatedToggle = this.checkbox(options, "Passende Notizen mitschicken", false);
+
+    const inputRow = root.createDiv({ cls: "claude-input-row claude-input-col" });
+    this.inputEl = inputRow.createEl("textarea", {
+      cls: "claude-input",
+      attr: { placeholder: "Deine Frage an Claude … (tippen oder mit dem Stift schreiben)", rows: "4" },
+    });
+    const buttons = inputRow.createDiv({ cls: "claude-button-row" });
+    this.sendBtn = buttons.createEl("button", { cls: "mod-cta", text: "In Claude öffnen" });
+    this.sendBtn.addEventListener("click", () => void this.sendToApp());
+    const pasteBtn = buttons.createEl("button", { text: "Antwort einfügen" });
+    pasteBtn.addEventListener("click", () => this.openPasteModal());
+  }
+
+  private async sendToApp(): Promise<void> {
+    const question = this.inputEl.value.trim();
+    if (!question) {
+      new Notice("Bitte zuerst eine Frage eingeben.");
+      return;
+    }
+    try {
+      const { prompt, attachments, hints } = await preparePrompt(this.app, this.plugin.settings, question, {
+        file: this.plugin.lastActiveFile(),
+        includeNote: this.noteToggle.checked,
+        web: this.webToggle.checked,
+        related: this.relatedToggle?.checked ?? false,
+      });
+      this.plugin.lastAppQuestion = question;
+      await openInClaude(this.app, prompt, attachments, hints);
+    } catch (err) {
+      new Notice(`Konnte die Frage nicht vorbereiten: ${describeError(err)}`);
+    }
+  }
+
+  private openPasteModal(): void {
+    this.plugin.openPasteModal();
   }
 
   async onClose(): Promise<void> {
@@ -90,7 +162,8 @@ export class ClaudeChatView extends ItemView {
   async ask(question: string, opts: { includeNote?: boolean } = {}): Promise<void> {
     if (opts.includeNote !== undefined) this.noteToggle.checked = opts.includeNote;
     this.inputEl.value = question;
-    await this.submit();
+    if (this.plugin.settings.mode === "app") await this.sendToApp();
+    else await this.submit();
   }
 
   focusInput(opts: { includeNote?: boolean } = {}): void {
