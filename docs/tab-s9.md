@@ -11,8 +11,9 @@ Diese Anleitung führt dich von der Installation bis zur handschriftlichen Notiz
 
 **Empfohlen: Google Play Store**
 
-1. Den **Google Play Store** öffnen.
-2. Nach **„Obsidian“** suchen. Der Anbieter heißt *Dynalist Inc.*, so heißt die Firma hinter Obsidian.
+1. Auf dem Tablet diesen Link öffnen: **[Obsidian im Google Play Store](https://play.google.com/store/apps/details?id=md.obsidian)**.
+   Oder den Play Store öffnen und nach **„Obsidian“** suchen.
+2. Den Eintrag prüfen. Der Anbieter heißt *Dynalist Inc.*, so heißt die Firma hinter Obsidian.
 3. **Installieren** tippen.
 
 **Alternative: APK-Datei**
@@ -44,10 +45,10 @@ Beim ersten Start fragt Obsidian, wo der Vault (dein Notiz-Ordner) liegen soll:
 2. **Community-Plugins** → **„Eingeschränkten Modus ausschalten“** → bestätigen.
 3. **Durchsuchen** antippen. Hier findest du alle Plugins.
 
-Installiere jetzt:
+Installiere jetzt (in der Suche den Namen eintippen; die Links zeigen die Plugin-Seiten im offiziellen [Plugin-Verzeichnis](https://community.obsidian.md/plugins)):
 
-1. **Excalidraw**: zum handschriftlichen Schreiben und Zeichnen mit dem S Pen. Danach in den Excalidraw-Einstellungen unter *Export* **„Auto-export PNG“** einschalten, damit Claude deine Zeichnungen lesen kann.
-2. **BRAT**: damit installierst du das Plugin *Claude Research* aus GitHub.
+1. **[Excalidraw](https://community.obsidian.md/plugins/obsidian-excalidraw-plugin)**: zum handschriftlichen Schreiben und Zeichnen mit dem S Pen. Danach in den Excalidraw-Einstellungen unter *Export* **„Auto-export PNG“** einschalten, damit Claude deine Zeichnungen lesen kann.
+2. **[BRAT](https://community.obsidian.md/plugins/obsidian42-brat)**: damit installierst du das Plugin *Claude Research* aus GitHub.
 
 Nach der Installation jedes Plugin mit dem Schalter **aktivieren**.
 
