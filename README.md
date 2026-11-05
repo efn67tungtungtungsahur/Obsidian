@@ -47,9 +47,10 @@ Wie in GoodNotes handschriftlich in Obsidian schreiben? Das geht mit Plugins, si
    `efn67tungtungtungsahur/Obsidian`
 3. Unter *Community-Plugins* das Plugin **Claude Research** aktivieren.
 
-> BRAT braucht ein GitHub-Release. Das erstellt der Workflow `.github/workflows/release.yml`
-> automatisch, sobald ein Versions-Tag gepusht wird (z. B. `git tag 0.1.0 && git push origin 0.1.0`,
-> passend zur Version in `manifest.json`).
+> BRAT installiert aus den GitHub-Releases. Die erstellt der Workflow `.github/workflows/release.yml`
+> automatisch: Sobald in `manifest.json` eine Version steht, für die es noch kein Release gibt,
+> wird gebaut, getestet und veröffentlicht. Für ein Update genügt es, die Version in `manifest.json`
+> (und `versions.json`) zu erhöhen und zu pushen. Das geht auch im GitHub-Web-Editor auf dem Tablet.
 
 ### Variante B: manuell
 

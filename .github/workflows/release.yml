@@ -1,30 +1,65 @@
-# Creates a GitHub release with main.js, manifest.json and styles.css when a version tag
-# (e.g. 0.1.0, matching manifest.json) is pushed. BRAT installs the plugin from these releases.
+# Publishes a GitHub release (main.js, manifest.json, styles.css) for the version in
+# manifest.json whenever that version has no release yet. BRAT installs the plugin from
+# these releases. To ship a new version: raise "version" in manifest.json (and add it to
+# versions.json), then push - no local git tags needed.
 name: Release
 
 on:
   push:
-    tags: ["*"]
+    branches: ["**"]
+    paths:
+      - manifest.json
+      - .github/workflows/release.yml
 
 permissions:
   contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - name: Create release
+
+      - name: Read version
+        id: version
+        run: echo "version=$(node -p "require('./manifest.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check for existing release
+        id: existing
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$GITHUB_REF_NAME" main.js manifest.json styles.css \
-            --title "Claude Research $GITHUB_REF_NAME" \
-            --notes "Installation: siehe README. Für BRAT einfach dieses Repository hinzufügen."
+          if gh release view "${{ steps.version.outputs.version }}" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${{ steps.version.outputs.version }} already exists - nothing to do."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.existing.outputs.exists == 'false'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Test and build
+        if: steps.existing.outputs.exists == 'false'
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Create release
+        if: steps.existing.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.version }}" main.js manifest.json styles.css \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Claude Research ${{ steps.version.outputs.version }}" \
+            --notes "Installation (auch auf Tablet/Handy): BRAT → Add Beta plugin → efn67tungtungtungsahur/Obsidian. Anleitung: docs/tab-s9.md"
