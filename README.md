@@ -44,7 +44,7 @@ Wie in GoodNotes handschriftlich in Obsidian schreiben? Das geht mit Plugins, si
 
 1. In Obsidian: *Einstellungen → Community-Plugins → Eingeschränkten Modus ausschalten → Durchsuchen*. Dort nach **BRAT** suchen, installieren und aktivieren.
 2. *Einstellungen → BRAT → Add Beta plugin* und dieses Repository eintragen:
-   `efn67tungtungtungsahur/obsidian`
+   `efn67tungtungtungsahur/Obsidian`
 3. Unter *Community-Plugins* das Plugin **Claude Research** aktivieren.
 
 > BRAT braucht ein GitHub-Release. Das erstellt der Workflow `.github/workflows/release.yml`
@@ -69,7 +69,7 @@ Der Schlüssel liegt im **Schlüsselspeicher von Obsidian** (SecretStorage). Er 
 | Was | Wie |
 |---|---|
 | Chat öffnen | Roboter-Symbol in der linken Leiste oder Befehlspalette (`Strg/Cmd + P`) → „Claude Research: Chat öffnen“ |
-| Recherche zu markiertem Text | Text markieren → Rechtsklick → **Mit Claude recherchieren** |
+| Recherche zu markiertem Text | Text markieren → Rechtsklick → **Mit Claude recherchieren**. Auf Tablet/Handy über die Werkzeugleiste oder die Befehlspalette, siehe [docs/tab-s9.md](docs/tab-s9.md) |
 | Frage zur offenen Notiz | Befehl „Frage zur aktuellen Notiz stellen“ oder im Chat **Aktuelle Notiz mitschicken** anhaken |
 | Handschrift transkribieren | Befehl „Handschrift der aktuellen Notiz transkribieren“ oder Rechtsklick auf Bild/PDF/Zeichnung im Dateibaum |
 | Antwort übernehmen | Unter der Antwort: **In Notiz einfügen** (an der Cursorposition) oder **Kopieren** |
@@ -100,6 +100,7 @@ Im Chat siehst du live, was Claude gerade tut, zum Beispiel *„Web-Suche: …�
 | Aktuelle Notiz mitschicken | aus | Startwert für das Häkchen im Chat. |
 | Transkriptionsstil | Aufgeräumt | *Aufgeräumt*: Markdown mit Überschriften, Listen und LaTeX. *Wortgetreu*: Zeile für Zeile. |
 | Persönliche Anweisungen | leer | Zum Beispiel Studienfach, Niveau oder gewünschter Stil. |
+| Verbindung | Automatisch | Live-Antworten. Schaltet auf Tablet/Handy selbst in den kompatiblen Modus, falls die Verbindung blockiert wird. |
 
 ---
 

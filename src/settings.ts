@@ -1,5 +1,6 @@
 import { App, PluginSettingTab, SecretComponent, Setting } from "obsidian";
 import type ClaudeResearchPlugin from "./main";
+import type { ConnectionMode } from "./http";
 
 export type ModelId = "claude-opus-5-5" | "claude-sonnet-5-5" | "claude-haiku-5-5";
 export type Effort = "low" | "medium" | "high" | "xhigh" | "max";
@@ -8,6 +9,9 @@ export type TranscriptionStyle = "clean" | "verbatim";
 export interface ClaudeResearchSettings {
   /** ID of the API key inside Obsidian's SecretStorage (the key itself is not stored in data.json). */
   apiKeySecret: string;
+  /** Only used where Obsidian offers no SecretStorage; stored in the plugin's data.json. */
+  apiKeyPlain: string;
+  connectionMode: ConnectionMode;
   model: ModelId;
   effort: Effort;
   webSearch: boolean;
@@ -21,6 +25,8 @@ export interface ClaudeResearchSettings {
 
 export const DEFAULT_SETTINGS: ClaudeResearchSettings = {
   apiKeySecret: "anthropic-api-key",
+  apiKeyPlain: "",
+  connectionMode: "auto",
   model: "claude-opus-5-5",
   effort: "high",
   webSearch: true,
@@ -59,16 +65,50 @@ export class ClaudeResearchSettingTab extends PluginSettingTab {
 
     new Setting(containerEl).setName("Zugang").setHeading();
 
+    const keySetting = new Setting(containerEl).setName("Anthropic-API-Schlüssel");
+    if (this.plugin.hasSecretStorage()) {
+      keySetting
+        .setDesc(
+          "Erstelle einen Schlüssel unter console.anthropic.com → API Keys (geht auch im Browser des Tablets). Er wird im Schlüsselspeicher von Obsidian abgelegt, nicht in den Plugin-Daten deines Vaults.",
+        )
+        .addComponent((el) =>
+          new SecretComponent(this.app, el).setValue(s.apiKeySecret).onChange(async (value) => {
+            s.apiKeySecret = value ?? "";
+            await save();
+          }),
+        );
+    } else {
+      keySetting
+        .setDesc(
+          "Erstelle einen Schlüssel unter console.anthropic.com → API Keys. Diese Obsidian-Version hat keinen Schlüsselspeicher, daher liegt der Schlüssel in den Plugin-Daten (data.json) deines Vaults – teile den Vault-Ordner nicht mit anderen.",
+        )
+        .addText((text) => {
+          text.inputEl.type = "password";
+          text
+            .setPlaceholder("sk-ant-…")
+            .setValue(s.apiKeyPlain)
+            .onChange(async (value) => {
+              s.apiKeyPlain = value.trim();
+              await save();
+            });
+        });
+    }
+
     new Setting(containerEl)
-      .setName("Anthropic-API-Schlüssel")
+      .setName("Verbindung")
       .setDesc(
-        "Erstelle einen Schlüssel unter console.anthropic.com → API Keys. Er wird im Schlüsselspeicher von Obsidian abgelegt, nicht in den Plugin-Daten deines Vaults.",
+        "„Automatisch“ zeigt Antworten live Wort für Wort und wechselt selbst in den kompatiblen Modus, falls das Tablet/Handy die Verbindung blockiert. Kommt im Chat „Keine Verbindung“, obwohl Internet da ist: „Kompatibel“ wählen.",
       )
-      .addComponent((el) =>
-        new SecretComponent(this.app, el).setValue(s.apiKeySecret).onChange(async (value) => {
-          s.apiKeySecret = value ?? "";
-          await save();
-        }),
+      .addDropdown((dd) =>
+        dd
+          .addOption("auto", "Automatisch (empfohlen)")
+          .addOption("stream", "Live-Streaming")
+          .addOption("compat", "Kompatibel – Antwort erscheint am Stück")
+          .setValue(s.connectionMode)
+          .onChange(async (value) => {
+            s.connectionMode = value as ConnectionMode;
+            await save();
+          }),
       );
 
     new Setting(containerEl).setName("Modell").setHeading();

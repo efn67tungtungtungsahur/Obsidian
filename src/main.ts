@@ -95,9 +95,21 @@ export default class ClaudeResearchPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
+  /** SecretStorage exists from Obsidian 1.11.4; guard anyway so the plugin still loads without it. */
+  hasSecretStorage(): boolean {
+    return typeof (this.app as { secretStorage?: { getSecret?: unknown } }).secretStorage?.getSecret === "function";
+  }
+
   getApiKey(): string | null {
-    if (!this.settings.apiKeySecret) return null;
-    return this.app.secretStorage.getSecret(this.settings.apiKeySecret);
+    if (this.hasSecretStorage() && this.settings.apiKeySecret) {
+      try {
+        const key = this.app.secretStorage.getSecret(this.settings.apiKeySecret);
+        if (key) return key;
+      } catch {
+        // fall through to the plain setting
+      }
+    }
+    return this.settings.apiKeyPlain || null;
   }
 
   /** The file the user was last working on (the chat sidebar itself is not a file). */

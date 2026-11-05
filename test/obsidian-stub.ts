@@ -15,3 +15,5 @@ export type App = unknown;
 export class PluginSettingTab {}
 export class SecretComponent {}
 export class Setting {}
+export const Platform = { isMobile: false };
+export function requestUrl(p: unknown) { return (globalThis as any).__requestUrl(p); }

@@ -1,5 +1,5 @@
 import type { BetaContentBlockParam } from "@anthropic-ai/sdk/resources/beta/messages/messages";
-import { Component, ItemView, MarkdownRenderer, Notice, TFile, WorkspaceLeaf, normalizePath, setIcon } from "obsidian";
+import { Component, ItemView, MarkdownRenderer, Notice, Platform, TFile, WorkspaceLeaf, normalizePath, setIcon } from "obsidian";
 import { collectAttachments } from "./attachments";
 import { Conversation, describeError } from "./claude";
 import type ClaudeResearchPlugin from "./main";
@@ -58,12 +58,16 @@ export class ClaudeChatView extends ItemView {
     this.noteToggle = this.checkbox(options, "Aktuelle Notiz mitschicken", this.plugin.settings.includeNoteByDefault);
 
     const inputRow = root.createDiv({ cls: "claude-input-row" });
-    this.inputEl = inputRow.createEl("textarea", {
-      cls: "claude-input",
-      attr: { placeholder: "Frag Claude … (Enter = senden, Shift+Enter = neue Zeile)", rows: "3" },
-    });
+    // Touch keyboards have no Shift+Enter, so on tablets/phones Enter makes a new line and
+    // the button sends. With a hardware keyboard (e.g. Book Cover Keyboard) Ctrl+Enter sends.
+    const placeholder = Platform.isMobile
+      ? "Frag Claude … (tippen oder mit dem Stift schreiben, dann „Senden“)"
+      : "Frag Claude … (Enter = senden, Shift+Enter = neue Zeile)";
+    this.inputEl = inputRow.createEl("textarea", { cls: "claude-input", attr: { placeholder, rows: "3" } });
     this.inputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+      if (e.key !== "Enter" || e.isComposing) return;
+      const send = Platform.isMobile ? e.ctrlKey || e.metaKey : !e.shiftKey;
+      if (send) {
         e.preventDefault();
         void this.submit();
       }
@@ -224,8 +228,12 @@ export class ClaudeChatView extends ItemView {
     const actions = msgEl.createDiv({ cls: "claude-actions" });
     this.iconButton(actions, "file-input", "In Notiz einfügen (an der Cursorposition)", () => this.insertIntoNote(markdown));
     this.iconButton(actions, "copy", "Kopieren", async () => {
-      await navigator.clipboard.writeText(markdown);
-      new Notice("Kopiert");
+      try {
+        await navigator.clipboard.writeText(markdown);
+        new Notice("Kopiert");
+      } catch {
+        new Notice("Kopieren nicht erlaubt – nutze „In Notiz einfügen“.");
+      }
     });
   }
 

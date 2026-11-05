@@ -10,6 +10,7 @@ import type {
 import type { App } from "obsidian";
 import type { ClaudeResearchSettings, ModelId } from "./settings";
 import { VAULT_TOOLS, runVaultTool, isVaultTool } from "./vaultTools";
+import { createFetch, type ConnectionMode } from "./http";
 
 /** Generous ceiling; streaming avoids HTTP timeouts and only generated tokens are billed. */
 const MAX_TOKENS = 64000;
@@ -22,10 +23,18 @@ export class MissingApiKeyError extends Error {
   }
 }
 
-export function createClient(apiKey: string): Anthropic {
+export function createClient(apiKey: string, mode: ConnectionMode): Anthropic {
   // Obsidian plugins run inside Electron / the mobile web view. The key never leaves the
   // device except in the request to api.anthropic.com, so the browser guard can be lifted.
-  return new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  // baseURL and authToken are set explicitly so ANTHROPIC_* environment variables (visible to
+  // the desktop app) cannot redirect requests or replace the key.
+  return new Anthropic({
+    apiKey,
+    authToken: null,
+    baseURL: "https://api.anthropic.com",
+    dangerouslyAllowBrowser: true,
+    fetch: createFetch(mode),
+  });
 }
 
 /** Claude Haiku 5.5 has no server-side refusal fallback; the others accept `fallbacks: "default"`. */
@@ -138,7 +147,7 @@ export class Conversation {
   async send(content: BetaContentBlockParam[], cb: TurnCallbacks): Promise<TurnResult> {
     const apiKey = this.getApiKey();
     if (!apiKey) throw new MissingApiKeyError();
-    const client = createClient(apiKey);
+    const client = createClient(apiKey, this.settings.connectionMode);
 
     this.aborted = false;
     const rollbackTo = this.messages.length;

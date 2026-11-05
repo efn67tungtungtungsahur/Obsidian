@@ -3,6 +3,8 @@
 Obsidian gibt es offiziell für Android, also auch für das Galaxy Tab S9, S9+ und S9 Ultra.
 Diese Anleitung führt dich von der Installation bis zur handschriftlichen Notiz, die Claude lesen kann.
 
+**Du brauchst keinen PC.** Jeder Schritt geht direkt auf dem Tablet: Installation, API-Schlüssel, Plugins, Schreiben mit dem S Pen, Recherche und Transkription.
+
 ---
 
 ## Schritt 1: Obsidian installieren
@@ -51,18 +53,41 @@ Nach der Installation jedes Plugin mit dem Schalter **aktivieren**.
 
 ---
 
-## Schritt 4: Claude Research installieren
+## Schritt 4: API-Schlüssel holen (im Browser des Tablets)
 
-1. *Einstellungen → BRAT → Add Beta plugin*.
-2. Eintragen: `efn67tungtungtungsahur/obsidian` → **Add Plugin**.
+1. Im Browser (Samsung Internet oder Chrome) [console.anthropic.com](https://console.anthropic.com) öffnen und ein Konto anlegen bzw. anmelden.
+2. Unter *Billing* Guthaben aufladen. Ein Claude-Pro-Abo zählt hier **nicht**, die API wird separat abgerechnet.
+3. Unter *API Keys* → **Create Key** einen Schlüssel erstellen und **kopieren**. Er wird nur einmal angezeigt.
+4. Empfehlung: Unter *Limits* ein monatliches Ausgabenlimit setzen, zum Beispiel 10 $.
+
+## Schritt 5: Claude Research installieren
+
+1. In Obsidian: *Einstellungen → BRAT → Add Beta plugin*.
+2. Eintragen: `efn67tungtungtungsahur/Obsidian` → **Add Plugin**. Das Repository ist öffentlich, ein GitHub-Konto brauchst du nicht.
 3. *Einstellungen → Community-Plugins* → **Claude Research** aktivieren.
-4. *Einstellungen → Claude Research → Anthropic-API-Schlüssel* → Schlüssel einfügen (erstellen unter [console.anthropic.com](https://console.anthropic.com)).
+4. *Einstellungen → Claude Research → Anthropic-API-Schlüssel* → den kopierten Schlüssel einfügen (lange auf das Feld tippen → *Einfügen*).
 
-> BRAT findet das Plugin erst, wenn im Repository ein **Release** existiert, siehe README → „Variante A“.
+## Schritt 6: Bedienleiste einrichten (empfohlen)
+
+Auf dem Tablet gibt es keinen Rechtsklick. Leg dir die wichtigsten Befehle deshalb in die **Werkzeugleiste über der Tastatur**:
+
+1. *Einstellungen → Mobil* (Mobile) → Werkzeugleiste bzw. Toolbar-Optionen verwalten.
+2. Diese Befehle hinzufügen:
+   - **Claude Research: Chat öffnen**
+   - **Claude Research: Markierten Text recherchieren**
+   - **Claude Research: Handschrift der aktuellen Notiz transkribieren**
+
+Alle Befehle findest du außerdem in der **Befehlspalette**: in einer Notiz von oben nach unten wischen und „Claude“ eintippen.
+
+**So bedienst du den Chat auf dem Tablet:**
+- Der Chat öffnet sich in der **rechten Seitenleiste**. Du öffnest sie mit dem Befehl oben oder indem du vom rechten Rand wischst.
+- **Enter** macht im Eingabefeld eine neue Zeile. Abgeschickt wird mit dem Knopf **Senden**. Mit Tastatur-Cover geht auch **Strg + Enter**.
+- Mit „S Pen zu Text“ kannst du die Frage auch **mit dem Stift schreiben** (siehe unten).
+- **In Notiz einfügen** setzt die Antwort an der Cursorposition der zuletzt geöffneten Notiz ein.
 
 ---
 
-## Schritt 5: Mit dem S Pen schreiben
+## Schritt 7: Mit dem S Pen schreiben
 
 **Handschriftliche Notiz in Excalidraw**
 
@@ -103,7 +128,9 @@ Das brauchst du nur, wenn du die Notizen auch auf Handy oder PC haben willst:
 | Problem | Lösung |
 |---|---|
 | „Community-Plugins“ zeigt nichts an | Eingeschränkten Modus ausschalten (Schritt 3), Internetverbindung prüfen |
-| BRAT findet das Plugin nicht | Im Repository muss erst ein Release existieren (README, „Variante A“) |
+| BRAT findet das Plugin nicht | Repository-Namen prüfen: `efn67tungtungtungsahur/Obsidian`. Es muss mindestens ein Release existieren (siehe Releases-Seite des Repositorys). |
 | PDF aus Samsung Notes taucht in Obsidian nicht auf | Der Vault liegt im *App-Speicher*. Neuen Vault im *Gerätespeicher* anlegen und die Dateien umziehen. |
+| Chat meldet „Keine Verbindung zu api.anthropic.com“, obwohl Internet da ist | *Einstellungen → Claude Research → Verbindung* auf **Kompatibel** stellen. Antworten erscheinen dann am Stück statt Wort für Wort. |
+| „Der API-Schlüssel ist ungültig“ | Schlüssel neu kopieren, ohne Leerzeichen am Anfang oder Ende. Prüfen, ob in der Anthropic-Konsole Guthaben vorhanden ist. |
 | Claude sagt bei Excalidraw „kein PNG“ | In den Excalidraw-Einstellungen **„Auto-export PNG“** einschalten und die Zeichnung einmal neu speichern |
 | Finger malen statt zu scrollen | In Excalidraw den Stift-Modus einschalten |

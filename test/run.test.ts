@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { Conversation, renderAnswer } from "../src/claude";
+import { Conversation, renderAnswer, describeError } from "../src/claude";
 import { collectAttachments } from "../src/attachments";
 import { DEFAULT_SETTINGS } from "../src/settings";
 import { TFile } from "obsidian";
@@ -45,7 +45,7 @@ function sse(content: Block[], stop_reason: string): string {
   return ev.map((e) => `event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join("");
 }
 
-const requests: { headers: Headers; body: any }[] = [];
+const requests: { headers: Headers; body: any; url?: string }[] = [];
 let script: string[] = [];
 (globalThis as any).fetch = async (_url: string, init: RequestInit) => {
   // Snapshot the body: the SDK passes the live messages array, which the conversation mutates later.
@@ -196,6 +196,45 @@ async function main() {
   const direct = await collectAttachments(vapp, vfiles[3]);
   assert.deepEqual(direct.labels, ["Skizze.excalidraw.md"]);
   console.log("ok handwriting collection");
+
+  // 8) Mobile: the web view blocks fetch (TypeError) -> automatic switch to requestUrl
+  requests.length = 0;
+  let requestUrlCalls = 0;
+  let nextStatus = 200;
+  (globalThis as any).__requestUrl = async (p: any) => {
+    requestUrlCalls++;
+    requests.push({ headers: new Headers(p.headers), body: JSON.parse(p.body), url: p.url });
+    if (nextStatus !== 200) {
+      const err = JSON.stringify({ type: "error", error: { type: "authentication_error", message: "invalid x-api-key" } });
+      return { status: nextStatus, headers: { "content-type": "application/json" }, arrayBuffer: new TextEncoder().encode(err).buffer };
+    }
+    return { status: 200, headers: { "content-type": "text/event-stream" }, arrayBuffer: new TextEncoder().encode(script.shift()!).buffer };
+  };
+  let fetchCalls = 0;
+  (globalThis as any).fetch = async () => {
+    fetchCalls++;
+    throw new TypeError("Failed to fetch");
+  };
+  const mobile = new Conversation(app, { ...DEFAULT_SETTINGS, connectionMode: "auto" }, () => "sk-tab", { web: false });
+  script = [sse([{ type: "text", text: "Hallo vom Tablet" }], "end_turn"), sse([{ type: "text", text: "Zweite Antwort" }], "end_turn")];
+  const m1 = await mobile.send([{ type: "text", text: "Hallo" }], cb([]));
+  assert.equal(m1.markdown, "Hallo vom Tablet");
+  assert.equal(fetchCalls, 1);
+  assert.equal(requestUrlCalls, 1);
+  assert.equal(requests[0].headers.get("authorization"), "Bearer sk-tab");
+  assert.equal(requests[0].url, "https://api.anthropic.com/v1/messages");
+  assert.equal(requests[0].body.stream, true);
+  const m2 = await mobile.send([{ type: "text", text: "Nochmal" }], cb([]));
+  assert.equal(m2.markdown, "Zweite Antwort");
+  assert.equal(fetchCalls, 1, "after the first failure fetch is not tried again");
+  assert.equal(requestUrlCalls, 2);
+  // API errors keep their typed SDK error in compat mode
+  nextStatus = 401;
+  const before8 = mobile.messages.length;
+  const authErr = await mobile.send([{ type: "text", text: "x" }], cb([])).catch((e) => e);
+  assert.match(describeError(authErr), /API-Schlüssel ist ungültig/);
+  assert.equal(mobile.messages.length, before8);
+  console.log("ok mobile compat fallback");
 }
 
 main().catch((e) => {
