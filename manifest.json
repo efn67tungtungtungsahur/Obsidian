@@ -1,7 +1,7 @@
 {
   "id": "claude-research",
   "name": "Claude Notebook",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "minAppVersion": "1.11.4",
   "description": "Handschriftliche Notizbücher (S Pen), Bibliothek wie in GoodNotes, GoodNotes-Import und Claude – ohne API über die Claude-App oder als Assistent, der direkt in deinen Notizen arbeitet.",
   "author": "efn67tungtungtungsahur",

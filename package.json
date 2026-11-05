@@ -1,6 +1,6 @@
 {
   "name": "obsidian-claude-research",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Claude in Obsidian: Chat, Web-Recherche mit Quellen und Handschrift-Transkription.",
   "main": "main.js",
   "private": true,
