@@ -1,144 +1,91 @@
-# Claude Research für Obsidian
+# Claude Notebook für Obsidian
 
-Ein Obsidian-Plugin, das **Claude in Obsidian** bringt. Es hat zwei Modi:
+Ein Obsidian-Plugin für das **Galaxy Tab S9 mit S Pen** (läuft auch auf iPad, Android und PC). Es hat vier Teile:
 
-- **Ohne API (Standard):** Das Plugin bereitet deine Frage samt Notiz, passenden Notizen und Recherche-Auftrag vor und öffnet die Claude-App bzw. claude.ai. Claude antwortet mit **deinem eigenen Claude-Konto** (kostenlos oder Abo), ohne API-Schlüssel und ohne Extrakosten. Die Antwort übernimmst du mit einem Tipp in die Notiz.
-- **Mit API-Schlüssel (optional):** Alles läuft direkt in Obsidian, wie unten beschrieben. Das wird pro Nutzung abgerechnet.
+1. **Bibliothek:** Deine Ordner, Notizbücher, PDFs und Notizen als übersichtliches Raster mit Vorschaubildern, Favoriten, „Zuletzt“ und Suche. Es ersetzt die unübersichtliche Seitenleiste.
+2. **Handschriftliches Notizbuch:** Schreiben mit dem S Pen (Druckstufen, Handballen-Erkennung, S Pen-Taste = Radierer), Textmarker, Lasso, Formen, Text, Bilder, Papiervorlagen, PDFs beschreiben und PDF-Export.
+3. **Claude:** Entweder **ohne API** über deine Claude-App (Frage wird vorbereitet, Antwort mit einem Tipp übernommen), oder **mit API** als Assistent, der wie das Claude-Add-in in PowerPoint **direkt in deinen Notizen arbeitet**: Er sieht, was offen ist, schreibt, ändert, ordnet und liest deine Handschrift. Jede Änderung bestätigst du, und sie lässt sich rückgängig machen.
+4. **GoodNotes-Verbindung:** Exportierte GoodNotes-Ordner (ZIP) und Notizbücher (PDF) importieren, mit Ordnerstruktur und Begleitnotiz je PDF. Neu exportierte Versionen werden erkannt.
 
-Funktionen (im API-Modus vollständig in Obsidian, ohne API über die Claude-App):
+| Bibliothek (Tab S9 quer) | Notizbuch (Tab S9 hochkant) |
+|---|---|
+| ![Bibliothek](docs/bilder/bibliothek.jpg) | ![Notizbuch](docs/bilder/notizbuch.jpg) |
 
-- **Chat in der Seitenleiste.** Fragen stellen, ohne Obsidian zu verlassen.
-- **Web-Recherche mit Quellen.** Claude sucht im Internet, liest Webseiten und belegt Aussagen mit nummerierten Links und einer Quellenliste.
-- **Suche in deinen Notizen.** Claude durchsucht und liest deinen Vault (nur lesend) und verweist mit `[[Links]]` auf passende Notizen.
-- **Handschrift lesen.** Handschriftliche Notizen aus Excalidraw, Ink, Fotos, Scans oder GoodNotes-PDFs werden transkribiert und dadurch durchsuchbar. Du kannst auch Fragen zu ihnen stellen.
-- **Ergebnisse übernehmen.** Antworten fügst du per Klick in die Notiz ein, ganze Recherchen speicherst du als eigene Notiz.
-
-> **Samsung Galaxy Tab S9?** Die Einrichtung von der Installation bis zur ersten
-> handschriftlichen Notiz steht in [docs/tab-s9.md](docs/tab-s9.md).
->
-> Neu bei Obsidian oder du suchst den GoodNotes-Ersatz? Lies zuerst
-> [docs/handschrift.md](docs/handschrift.md). Andere Wege, Claude mit Obsidian zu verbinden
-> (Claude-App, MCP, Claude Code), stehen in [docs/alternativen.md](docs/alternativen.md).
+**Anleitungen**
+- [Einrichtung auf dem Galaxy Tab S9](docs/tab-s9.md): Schritt für Schritt, kein PC nötig
+- [Das handschriftliche Notizbuch](docs/notizbuch.md): Werkzeuge, S Pen, PDFs und was GoodNotes noch besser kann
+- [GoodNotes mit Obsidian verbinden](docs/goodnotes.md)
+- [Andere Handschrift-Optionen](docs/handschrift.md) (Excalidraw, Ink, Samsung Notes) und [andere Claude-Anbindungen](docs/alternativen.md) (Claude-App mit MCP, Claudian, Claude Code)
 
 ---
 
 ## Was ist Obsidian?
 
-[Obsidian](https://obsidian.md) ist eine Notiz-App für Windows, macOS, Linux, iPad/iPhone und Android. Ein paar Grundideen:
+[Obsidian](https://obsidian.md) ist eine Notiz-App für Windows, macOS, Linux, iPad/iPhone und Android.
 
-- **Deine Notizen sind normale Dateien.** Jede Notiz ist eine Markdown-Textdatei (`.md`) in einem Ordner auf deinem Gerät. Dieser Ordner heißt **Vault** (Tresor). Es gibt keine Cloud-Pflicht und keinen Anbieter-Lock-in.
-- **Verlinken statt Ordnerchaos.** Mit `[[Notizname]]` verknüpfst du Notizen. Die „Graph-Ansicht“ zeigt dir, wie dein Wissen zusammenhängt.
-- **Erweiterbar durch Plugins.** Tausende Community-Plugins ergänzen Funktionen, zum Beispiel Zeichnen, Handschrift, Kalender, Karteikarten oder eben KI.
-- **Kosten:** Obsidian selbst ist kostenlos. Optional zahlst du für *Obsidian Sync* (Synchronisation zwischen Geräten) und *Publish*. Zum Synchronisieren gehen auch iCloud, OneDrive, Syncthing oder Git.
-
-Wie in GoodNotes handschriftlich in Obsidian schreiben? Das geht mit Plugins, siehe [docs/handschrift.md](docs/handschrift.md).
+- **Deine Notizen sind normale Dateien** in einem Ordner auf deinem Gerät, dem **Vault**. Es gibt keine Cloud-Pflicht.
+- **Verlinken:** Mit `[[Notizname]]` verknüpfst du Notizen zu einem Wissensnetz.
+- **Erweiterbar durch Plugins**, so wie dieses hier.
+- **Kosten:** Obsidian ist kostenlos. Optional gibt es *Obsidian Sync* zum Synchronisieren zwischen Geräten.
 
 ---
 
-## Installation
+## Installation (kurz)
 
-### Voraussetzungen
+Die ausführliche Anleitung für das Tablet steht in [docs/tab-s9.md](docs/tab-s9.md).
 
-1. **Obsidian 1.11.4 oder neuer** (Desktop oder Mobil, auch Android-Tablets wie das Galaxy Tab S9, siehe [docs/tab-s9.md](docs/tab-s9.md)).
-2. **Ohne API (Standard):** ein Claude-Konto und die Claude-App bzw. claude.ai im Browser. Sonst nichts.
-3. **Nur für den API-Modus:** ein Anthropic-API-Schlüssel von [console.anthropic.com](https://console.anthropic.com) → *API Keys*. Dort lädst du auch Guthaben auf.
-   **Wichtig:** Ein Claude-Pro- oder Max-Abo enthält **keine** API-Nutzung. Die API wird getrennt nach Verbrauch abgerechnet. Mehr dazu unter [Kosten](#kosten).
+1. Obsidian aus dem [Play Store](https://play.google.com/store/apps/details?id=md.obsidian) installieren und einen Vault im **Gerätespeicher** anlegen.
+2. *Einstellungen → Community-Plugins → Community-Plugins aktivieren → Durchsuchen* → **BRAT** installieren und aktivieren.
+3. *Einstellungen → BRAT → Add Beta plugin* → `efn67tungtungtungsahur/Obsidian` eintragen.
+4. *Community-Plugins* → **Claude Notebook** aktivieren. Die Bibliothek öffnet sich.
 
-### Variante A: über BRAT (am einfachsten, auch auf dem iPad)
-
-[BRAT](https://github.com/TfTHacker/obsidian42-brat) installiert Plugins direkt aus GitHub-Repositories.
-
-1. In Obsidian: *Einstellungen → Community-Plugins → Eingeschränkten Modus ausschalten → Durchsuchen*. Dort nach **BRAT** suchen, installieren und aktivieren.
-2. *Einstellungen → BRAT → Add Beta plugin* und dieses Repository eintragen:
-   `efn67tungtungtungsahur/Obsidian`
-3. Unter *Community-Plugins* das Plugin **Claude Research** aktivieren.
-
-> BRAT installiert aus den GitHub-Releases. Die erstellt der Workflow `.github/workflows/release.yml`
-> automatisch: Sobald in `manifest.json` eine Version steht, für die es noch kein Release gibt,
-> wird gebaut, getestet und veröffentlicht. Für ein Update genügt es, die Version in `manifest.json`
-> (und `versions.json`) zu erhöhen und zu pushen. Das geht auch im GitHub-Web-Editor auf dem Tablet.
-
-### Variante B: manuell
-
-1. Bauen (siehe [Entwicklung](#entwicklung)) oder `main.js`, `manifest.json` und `styles.css` aus einem Release herunterladen.
-2. Im Vault den Ordner `.obsidian/plugins/claude-research/` anlegen und die drei Dateien hineinkopieren.
-3. Obsidian neu laden und unter *Community-Plugins* **Claude Research** aktivieren.
-
-### API-Schlüssel eintragen (nur API-Modus)
-
-*Einstellungen → Claude Research → Modus: „Mit API-Schlüssel“*, dann *Anthropic-API-Schlüssel*: einen neuen Eintrag anlegen und den Schlüssel einfügen.
-Der Schlüssel liegt im **Schlüsselspeicher von Obsidian** (SecretStorage). Er steht nicht in den Plugin-Daten, die mit deinem Vault synchronisiert werden.
+> BRAT installiert aus den GitHub-Releases. Ein Release entsteht automatisch, sobald in `manifest.json`
+> eine neue Version steht (Workflow `.github/workflows/release.yml`). Das geht auch im GitHub-Web-Editor auf dem Tablet.
 
 ---
 
-## Bedienung
+## Claude: zwei Modi
 
-| Was | Wie |
-|---|---|
-| Chat öffnen | Roboter-Symbol in der linken Leiste oder Befehlspalette (`Strg/Cmd + P`) → „Claude Research: Chat öffnen“ |
-| Recherche zu markiertem Text | Text markieren → Rechtsklick → **Mit Claude recherchieren**. Auf Tablet/Handy über die Werkzeugleiste oder die Befehlspalette, siehe [docs/tab-s9.md](docs/tab-s9.md) |
-| Frage zur offenen Notiz | Befehl „Frage zur aktuellen Notiz stellen“ oder im Chat **Aktuelle Notiz mitschicken** anhaken |
-| Handschrift transkribieren | Befehl „Handschrift der aktuellen Notiz transkribieren“ oder Rechtsklick auf Bild/PDF/Zeichnung im Dateibaum |
-| Antwort übernehmen | Unter der Antwort: **In Notiz einfügen** (an der Cursorposition) oder **Kopieren** |
-| Recherche aufbewahren | Diskettensymbol im Chat → neue Notiz im Ordner `Claude-Recherche/` (mit Frontmatter-Tags `claude`, `recherche`) |
-| Neuer Chat | Plus-Symbol. Der Schalter *Web-Suche* gilt pro Chat. |
-| Abbrechen | **Stopp** während Claude arbeitet |
-
-Im Chat siehst du live, was Claude gerade tut, zum Beispiel *„Web-Suche: …“*, *„Durchsucht Notizen: …“* oder *„Liest Notiz: …“*.
-
-### Beispiele
-
-- *„Fasse den aktuellen Forschungsstand zu Mikroplastik im Trinkwasser zusammen, mit Quellen.“*
-- *„Was habe ich in meinen Notizen schon über den Calvin-Zyklus geschrieben? Ergänze, was fehlt.“*
-- Mit *Aktuelle Notiz mitschicken* und einer handschriftlichen Mitschrift: *„Erstelle aus meiner Mitschrift 10 Karteikarten-Fragen.“*
-- *„Prüfe die Jahreszahlen in meiner Notiz auf Richtigkeit.“*
-
----
-
-## Einstellungen
-
-| Einstellung | Standard | Bedeutung |
+| | **Ohne API** (Standard) | **Mit API-Schlüssel** |
 |---|---|---|
-| Modell | Claude Opus 5.5 | Beste Qualität. *Sonnet 5.5* ist günstiger und schneller, *Haiku 5.5* am günstigsten. |
-| Gründlichkeit (Effort) | Hoch | Wie viel Claude nachdenkt. „Niedrig“ ist für einfache Fragen schneller und billiger. |
-| Web-Suche | an | Claude darf im Web suchen und Seiten lesen. |
-| Max. Web-Suchen pro Frage | 5 | Kostenbremse für Web-Suchen. |
-| In Notizen suchen | an | Claude darf deinen Vault durchsuchen und lesen. Ändern kann es nichts. |
-| Aktuelle Notiz mitschicken | aus | Startwert für das Häkchen im Chat. |
-| Transkriptionsstil | Aufgeräumt | *Aufgeräumt*: Markdown mit Überschriften, Listen und LaTeX. *Wortgetreu*: Zeile für Zeile. |
-| Persönliche Anweisungen | leer | Zum Beispiel Studienfach, Niveau oder gewünschter Stil. |
-| Verbindung | Automatisch | Live-Antworten. Schaltet auf Tablet/Handy selbst in den kompatiblen Modus, falls die Verbindung blockiert wird. |
+| Kosten | keine extra, dein Claude-Konto (kostenlos oder Abo) | pro Nutzung, getrennt vom Abo |
+| Wo antwortet Claude? | in der Claude-App bzw. auf claude.ai | direkt in Obsidian |
+| Ablauf | Frage vorbereiten → in Claude einfügen → Antwort kopieren → „Antwort einfügen“ | Frage stellen, fertig |
+| Notizen bearbeiten | du fügst die Antwort ein | Claude ändert direkt, mit deiner Freigabe |
+| Handschrift lesen | Seiten werden als Bild bereitgelegt, du hängst sie in Claude an | automatisch |
+
+Umstellen: *Einstellungen → Claude Notebook → Modus*.
+
+**Warum kann „ohne API“ nicht direkt in Obsidian arbeiten?** Anthropic erlaubt Plugins anderer Entwickler nicht, sich mit deinem Claude-Abo anzumelden. Das [Claudian-Plugin](docs/alternativen.md) umgeht das, indem es am PC das offizielle Claude Code startet. Auf Android geht das nicht. Auf dem Tablet braucht der „Claude arbeitet in deinen Notizen“-Modus deshalb einen API-Schlüssel.
+
+### Beispiele mit API
+- *„Fasse diese Notiz zusammen und schreib die Zusammenfassung oben hinein.“*
+- *„Mach aus Seite 1 meines Notizbuchs eine saubere Notiz mit Überschriften.“*
+- *„Erstelle 10 Karteikarten zu dieser Mitschrift als neue Notiz im Ordner Lernen.“*
+- *„Recherchiere den aktuellen Stand zu Mikroplastik und ergänze einen Abschnitt mit Quellen.“*
+
+Claude zeigt vor jeder Änderung eine Vorschau (*Bisher / Neu*) mit **Erlauben / Ablehnen**. Danach gibt es **Rückgängig** und **Öffnen**.
 
 ---
 
-## Kosten
+## Kosten (nur API-Modus)
 
-**Ohne API:** keine Kosten durch das Plugin. Es gelten die Limits deines Claude-Kontos (kostenlos oder Abo).
+Abgerechnet wird nach Tokens, Web-Suchen kosten zusätzlich ([Preise](https://www.anthropic.com/pricing)). Grobe Richtwerte mit Opus 5.5:
+- einfache Frage: unter 1 Cent bis wenige Cent
+- Recherche mit Web-Suche: etwa 5 bis 30 Cent
+- eine handschriftliche Seite in Text umwandeln: etwa 1 bis 3 Cent
 
-**Mit API:**
-Die API rechnet nach **Tokens** ab (grob 1 Token ≈ ¾ Wort). Web-Suchen kosten zusätzlich pro Suche. Aktuelle Preise stehen auf [anthropic.com/pricing](https://www.anthropic.com/pricing).
-
-Grobe Richtwerte:
-
-- Einfache Frage ohne Recherche: meist **unter 1 Cent bis wenige Cent**
-- Recherche mit mehreren Web-Suchen (viel gelesener Text): etwa **5 bis 30 Cent** mit Opus 5.5, mit Sonnet 5.5 rund die Hälfte
-- Transkription einer handschriftlichen Seite: etwa **1 bis 3 Cent**
-
-So sparst du:
-
-- Für Alltagsfragen *Sonnet 5.5* oder *Effort: Niedrig/Mittel* wählen.
-- *Max. Web-Suchen* niedrig halten.
-- Für neue Themen einen **neuen Chat** starten, denn lange Chats schicken den ganzen Verlauf jedes Mal mit. Wiederholte Teile werden günstiger aus dem Cache gelesen.
-- In der Anthropic-Konsole ein **Ausgabenlimit** setzen.
+Sparen: in den Einstellungen *Sonnet 5.5* oder *Gründlichkeit: Mittel* wählen, für neue Themen einen neuen Chat starten und in der Anthropic-Konsole ein Ausgabenlimit setzen.
 
 ---
 
 ## Datenschutz & Sicherheit
 
-- Anfragen gehen **direkt von deinem Gerät an `api.anthropic.com`**. Es gibt keinen Zwischenserver.
-- An Claude geht nur, was du schickst: deine Frage, die aktuelle Notiz (wenn angehakt) und Notizen, die Claude über die Vault-Suche liest. Wenn du das nicht willst, schalte *In Notizen suchen* aus.
-- Die Vault-Werkzeuge sind **nur lesend**. Claude kann keine Dateien ändern oder löschen. Text fügst nur du per Klick ein.
-- Webseiten und Notizen können Text enthalten, der wie eine Anweisung aussieht (Prompt Injection). Claude ist angewiesen, solche Inhalte als Material zu behandeln. Prüfe wichtige Ergebnisse trotzdem selbst, besonders die Quellen.
+- **Ohne API** geht nichts automatisch an Claude. Du entscheidest beim Einfügen in die Claude-App, was du teilst.
+- **Mit API** gehen Anfragen direkt von deinem Gerät an `api.anthropic.com`. An Claude geht nur deine Frage, die geöffnete Notiz (wenn nötig) und was Claude über die Werkzeuge liest.
+- **Änderungen an Notizen nur mit deiner Freigabe**, außer du schaltest „Änderungen ohne Nachfrage übernehmen“ ein. Alles ist rückgängig zu machen.
+- Der API-Schlüssel liegt im Schlüsselspeicher von Obsidian, nicht im Vault.
+- Webseiten und Notizen können versteckte Anweisungen enthalten (Prompt Injection). Claude behandelt sie als Material. Prüfe Vorschauen und Quellen trotzdem selbst.
 
 ---
 
@@ -146,27 +93,25 @@ So sparst du:
 
 ```bash
 npm install
-npm test        # Offline-Tests (gemockte API, kein Schlüssel nötig)
-npm run build   # Typprüfung + main.js bauen
+npm test        # Offline-Tests: API, Agent, Notizbuch, PDF-Export, GoodNotes-Import (kein Schlüssel nötig)
+npm run build   # Typprüfung + main.js
 npm run dev     # Watch-Modus
 ```
 
-Zum Testen den Repository-Ordner in `<Vault>/.obsidian/plugins/claude-research/` verlinken oder dorthin kopieren und in Obsidian *Befehlspalette → „Reload app without saving“* ausführen.
-
-### Aufbau
-
 | Datei | Inhalt |
 |---|---|
-| `src/main.ts` | Plugin-Einstieg: Befehle, Kontextmenüs, Seitenleiste |
-| `src/chatView.ts` | Chat-Oberfläche |
-| `src/claude.ts` | Anbindung an die Claude-API: Streaming, Werkzeug-Schleife, Quellenangaben, Fehlertexte |
-| `src/vaultTools.ts` | Werkzeuge `search_vault` und `read_note` (nur lesend) |
-| `src/attachments.ts` | Sammelt Bilder, PDFs, Excalidraw- und Ink-Zeichnungen einer Notiz für Claude |
-| `src/transcribe.ts` | Handschrift → Text, als Callout in die Notiz bzw. in eine Begleitnotiz |
-| `src/settings.ts` | Einstellungen |
-| `test/` | Offline-Tests mit gemockter API und gemocktem Vault |
+| `src/main.ts` | Plugin-Einstieg: Ansichten, Befehle, Menüs, Verbindung der Teile |
+| `src/library/` | Bibliothek (Raster, Vorschaubilder, Dialog „Neues Notizbuch“) |
+| `src/notebook/` | Notizbuch: Datenmodell, Zeichnen (perfect-freehand), Ansicht mit Werkzeugen, PDF-Import/-Export |
+| `src/goodnotes.ts` | GoodNotes-Import (ZIP/PDF), Begleitnotizen, Änderungserkennung |
+| `src/agentTools.ts` | Werkzeuge für Claude: aktive Notiz, anlegen, ändern, ergänzen, verschieben, Notizbuchseite ansehen |
+| `src/claude.ts`, `src/http.ts` | Claude-API: Streaming, Werkzeug-Schleife, Quellen, Fallback-Verbindung fürs Tablet |
+| `src/chatView.ts` | Claude-Bereich: Chat, Freigabe- und Rückgängig-Karten, Modus ohne API |
+| `src/appBridge.ts` | Modus ohne API: Frage vorbereiten, Claude öffnen, Antwort übernehmen |
+| `src/notebookClaude.ts`, `src/transcribe.ts`, `src/attachments.ts` | Handschrift → Text |
+| `test/` | Node-Tests und Browser-Testumgebung (`test/browser/`) für Bildschirmfotos |
 
-Technische Eckdaten: offizielles `@anthropic-ai/sdk`, Streaming, adaptives Denken mit einstellbarem `effort`, Web-Suche und Web-Fetch als Server-Werkzeuge, Prompt-Caching und `fallbacks: "default"`. Bei Opus und Sonnet wird eine Anfrage, die von den Sicherheitsfiltern abgelehnt wird, serverseitig automatisch mit einem Ersatzmodell wiederholt.
+Technik: offizielles `@anthropic-ai/sdk`, Claude Opus 5.5 mit adaptivem Denken, Web-Suche/Web-Fetch als Server-Werkzeuge, Prompt-Caching, `fallbacks: "default"` (abgelehnte Anfragen werden bei Opus/Sonnet serverseitig mit einem Ersatzmodell wiederholt).
 
 ## Lizenz
 

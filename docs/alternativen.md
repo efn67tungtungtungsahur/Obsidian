@@ -1,11 +1,13 @@
 # Andere Wege, Claude mit Obsidian zu verbinden
 
-Das Plugin in diesem Repository ist der Weg **„Claude in Obsidian“**: Du arbeitest in Obsidian, Claude ist in der Seitenleiste dabei. Abgerechnet wird über die API.
+Das Plugin in diesem Repository ist der Weg **„Claude in Obsidian“**: Du arbeitest in Obsidian, und Claude hilft dir entweder über die Claude-App (ohne API) oder direkt in Obsidian (mit API-Schlüssel).
 Es gibt auch den umgekehrten Weg, **„Obsidian in Claude“**. Dabei liest und schreibt die Claude-App deine Notizen.
 
 | Weg | Wo du arbeitest | Abrechnung | Kann Notizen ändern? | Aufwand |
 |---|---|---|---|---|
-| **Dieses Plugin** | in Obsidian (auch iPad) | API, nach Verbrauch | nein, nur Einfügen per Klick | gering |
+| **Dieses Plugin, ohne API** | in Obsidian + Claude-App | dein Claude-Konto | du fügst die Antwort per Tipp ein | gering |
+| **Dieses Plugin, mit API** | in Obsidian (auch Tablet) | API, nach Verbrauch | ja, mit Freigabe und Rückgängig | gering |
+| **Claudian** (Community-Plugin) | in Obsidian, **nur PC/Mac** | Claude-Abo (über Claude Code) oder API | ja | mittel, Claude Code muss installiert sein |
 | **Claude-App + MCP** | in der Claude-Desktop-App | dein Claude-Abo | ja, wenn erlaubt | mittel |
 | **Claude Code im Vault** | im Terminal / in der Claude-App | Claude-Abo oder API | ja | mittel |
 

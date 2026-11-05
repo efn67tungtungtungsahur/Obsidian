@@ -19,3 +19,7 @@ export const Platform = { isMobile: false };
 export function requestUrl(p: unknown) { return (globalThis as any).__requestUrl(p); }
 export class Modal { constructor(public app: unknown) {} open() {} close() {} setTitle() { return this; } }
 export class MarkdownView {}
+export class TFolder { constructor(public path: string, public children: unknown[] = []) {} get name() { return this.path.split("/").pop()!; } }
+export function loadPdfJs(): Promise<unknown> { throw new Error("pdf.js not available in tests"); }
+export class Menu {}
+export class FuzzySuggestModal {}

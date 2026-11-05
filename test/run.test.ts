@@ -263,6 +263,43 @@ async function main() {
   const bare = await preparePrompt(mixedApp, { ...DEFAULT_SETTINGS }, "Frage", { file: vfiles[0], includeNote: false, web: false, related: false });
   assert.ok(!bare.prompt.includes("<notiz>") && !bare.prompt.includes("anhängen") && bare.attachments.length === 0);
   console.log("ok app mode prompt");
+
+  // 10) Agent turn: Claude edits the open note, the user approves, the file changes
+  (globalThis as any).fetch = async (_u: string, init: RequestInit) => {
+    requests.push({ headers: new Headers(init.headers as HeadersInit), body: JSON.parse(init.body as string) });
+    return new Response(script.shift()!, { status: 200, headers: { "content-type": "text/event-stream" } });
+  };
+  requests.length = 0;
+  const noteFile = Object.assign(new TFile("Bio/Zelle.md"), { content: "# Zelle\nMitochondrien: Kraftwerk." });
+  const agentApp = {
+    ...app,
+    vault: { ...app.vault, getFileByPath: (p: string) => (p === noteFile.path ? noteFile : null), read: async () => noteFile.content,
+      process: async (_f: unknown, fn: (d: string) => string) => (noteFile.content = fn(noteFile.content)) },
+  } as any;
+  const approvals: string[] = [];
+  const agentConv = new Conversation(agentApp, { ...DEFAULT_SETTINGS, mode: "api", connectionMode: "stream" }, () => "sk-test", {
+    web: false,
+    agent: {
+      onStatus: () => {},
+      approve: async (c) => { approvals.push(c.summary); return true; },
+      onApplied: () => {},
+      activeFile: () => noteFile,
+      selection: () => "",
+    },
+  });
+  script = [
+    sse([{ type: "tool_use", id: "t1", name: "edit_note", input: { path: "Bio/Zelle.md", old_text: "Kraftwerk.", new_text: "Kraftwerk der Zelle (ATP)." } }], "tool_use"),
+    sse([{ type: "text", text: "Ich habe die Erklärung präzisiert." }], "end_turn"),
+  ];
+  const agentRes = await agentConv.send([{ type: "text", text: "Präzisiere den Satz." }], cb([]));
+  assert.equal(agentRes.outcome, "done");
+  assert.deepEqual(approvals, ["„Zelle“ ändern"]);
+  assert.equal(noteFile.content, "# Zelle\nMitochondrien: Kraftwerk der Zelle (ATP).");
+  const toolNames = requests[0].body.tools.map((t: any) => t.name);
+  assert.ok(toolNames.includes("edit_note") && toolNames.includes("view_notebook_page") && toolNames.includes("search_vault"));
+  assert.match(requests[0].body.system, /wie ein Add-in/);
+  assert.equal(requests[1].body.messages.at(-1).content[0].content, "Edited Bio/Zelle.md.");
+  console.log("ok agent turn with approval");
 }
 
 main().catch((e) => {

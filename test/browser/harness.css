@@ -1,0 +1,17 @@
+/* Approximation of Obsidian's default light theme variables. */
+:root, body {
+  --background-primary: #ffffff; --background-secondary: #f2f3f5; --background-modifier-border: #e0e0e0;
+  --background-modifier-hover: rgba(0,0,0,0.06); --background-modifier-error: #e93147;
+  --interactive-accent: #7a5af8; --text-on-accent: #ffffff; --text-normal: #222; --text-muted: #6b6b6b; --text-faint: #a0a0a0;
+  --text-accent: #6a4be6; --color-red-rgb: 233,49,71; --color-green-rgb: 8,185,78; --color-green: #08b94e;
+  --font-ui-smaller: 12px; --font-ui-small: 13px; --font-ui-medium: 15px; --font-semibold: 600; --font-medium: 500; --font-normal: 400;
+  --size-2-2: 4px; --size-4-1: 4px; --size-4-2: 8px; --size-4-3: 12px; --size-4-4: 16px; --radius-s: 4px; --radius-m: 8px;
+  --font-monospace: monospace;
+  font-family: -apple-system, "Segoe UI", Roboto, Inter, sans-serif; color: var(--text-normal); margin: 0;
+}
+button { font: inherit; border: 1px solid var(--background-modifier-border); background: var(--background-primary); border-radius: 6px; padding: 4px 10px; cursor: pointer; color: var(--text-normal); height: 32px; }
+button.mod-cta { background: var(--interactive-accent); color: var(--text-on-accent); border-color: transparent; }
+button.clickable-icon { border: none; background: transparent; padding: 4px; }
+input[type=search], input[type=text] { font: inherit; border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 6px 10px; }
+#app { position: fixed; inset: 0; display: flex; flex-direction: column; }
+#app > .view-content { flex: 1; min-height: 0; }

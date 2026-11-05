@@ -10,6 +10,7 @@ import type {
 import type { App } from "obsidian";
 import type { ClaudeResearchSettings, ModelId } from "./settings";
 import { VAULT_TOOLS, runVaultTool, isVaultTool } from "./vaultTools";
+import { AGENT_TOOLS, AgentContext, isAgentTool, runAgentTool } from "./agentTools";
 import { createFetch, type ConnectionMode } from "./http";
 
 /** Generous ceiling; streaming avoids HTTP timeouts and only generated tokens are billed. */
@@ -70,7 +71,7 @@ function webTools(settings: ClaudeResearchSettings): BetaToolUnion[] {
   ];
 }
 
-export function buildSystemPrompt(settings: ClaudeResearchSettings, vaultName: string, tools: { web: boolean; vault: boolean }): string {
+export function buildSystemPrompt(settings: ClaudeResearchSettings, vaultName: string, tools: { web: boolean; vault: boolean; agent?: boolean }): string {
   const today = new Date().toLocaleDateString("de-DE", { year: "numeric", month: "long", day: "numeric" });
   const lines = [
     `Du bist ein Recherche-Assistent, eingebettet in Obsidian (Vault „${vaultName}“). Heute ist der ${today}.`,
@@ -85,6 +86,12 @@ export function buildSystemPrompt(settings: ClaudeResearchSettings, vaultName: s
   if (tools.vault) {
     lines.push(
       "Du kannst die Notizen des Nutzers durchsuchen (search_vault) und lesen (read_note). Wenn die Frage eigene Notizen, Mitschriften oder frühere Recherchen betreffen könnte, schau dort zuerst nach. Verweise auf gefundene Notizen mit [[Notizname]].",
+    );
+  }
+  if (tools.agent) {
+    lines.push(
+      "Du arbeitest direkt in Obsidian – wie ein Add-in in einer Office-App. Mit get_active_note siehst du, was der Nutzer gerade offen hat (inklusive markiertem Text). Du kannst Notizen anlegen (create_note), gezielt ändern (edit_note), ergänzen (append_to_note), Dateien ordnen (move_note, list_folder) und Seiten handschriftlicher Notizbücher ansehen (view_notebook_page).",
+      "Wenn der Nutzer dich bittet, etwas zu schreiben, zu überarbeiten, zusammenzufassen oder zu ordnen, mach es direkt in den Notizen, statt den Text nur im Chat auszugeben. Jede Änderung muss der Nutzer bestätigen; ändere nur, worum er gebeten hat, und fasse danach kurz zusammen, was du geändert hast.",
     );
   }
   lines.push(
@@ -119,6 +126,7 @@ export class Conversation {
   readonly system: string;
   readonly tools: BetaToolUnion[];
   readonly webEnabled: boolean;
+  private readonly agent: AgentContext | null;
   private stream: { abort(): void } | null = null;
   private aborted = false;
 
@@ -126,13 +134,14 @@ export class Conversation {
     private app: App,
     private settings: ClaudeResearchSettings,
     private getApiKey: () => string | null,
-    opts: { web: boolean },
+    opts: { web: boolean; agent?: AgentContext | null },
   ) {
     // Tool set and system prompt are frozen for the conversation so the prompt cache stays valid.
     this.webEnabled = opts.web;
     const vault = settings.vaultTools;
-    this.tools = [...(opts.web ? webTools(settings) : []), ...(vault ? VAULT_TOOLS : [])];
-    this.system = buildSystemPrompt(settings, app.vault.getName(), { web: opts.web, vault });
+    this.agent = opts.agent ?? null;
+    this.tools = [...(opts.web ? webTools(settings) : []), ...(vault ? VAULT_TOOLS : []), ...(this.agent ? AGENT_TOOLS : [])];
+    this.system = buildSystemPrompt(settings, app.vault.getName(), { web: opts.web, vault, agent: !!this.agent });
   }
 
   get isEmpty(): boolean {
@@ -212,12 +221,21 @@ export class Conversation {
 
         const results: BetaToolResultBlockParam[] = [];
         for (const use of toolUses) {
-          if (!isVaultTool(use.name)) {
+          if (isVaultTool(use.name)) {
+            const result = await runVaultTool(this.app, use.name, use.input, cb.onStatus);
+            results.push({ type: "tool_result", tool_use_id: use.id, ...result });
+          } else if (this.agent && isAgentTool(use.name)) {
+            const result = await runAgentTool(this.app, use.name, use.input, { ...this.agent, onStatus: cb.onStatus });
+            results.push({ type: "tool_result", tool_use_id: use.id, ...result });
+          } else {
             results.push({ type: "tool_result", tool_use_id: use.id, is_error: true, content: `Unbekanntes Werkzeug: ${use.name}` });
-            continue;
           }
-          const result = await runVaultTool(this.app, use.name, use.input, cb.onStatus);
-          results.push({ type: "tool_result", tool_use_id: use.id, ...result });
+          if (this.aborted) break;
+        }
+        if (this.aborted) {
+          // Stopped while a tool was waiting (e.g. for approval): drop the whole turn.
+          this.messages.length = rollbackTo;
+          return { markdown: renderAnswer(answerBlocks), outcome: "aborted" };
         }
         // All tool results of one assistant turn go back in a single user message.
         this.messages.push({ role: "user", content: results });

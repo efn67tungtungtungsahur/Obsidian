@@ -3,7 +3,7 @@ import { baseParams, createClient, describeError, MissingApiKeyError } from "./c
 import { collectAttachments, isVisualFile } from "./attachments";
 import type { ClaudeResearchSettings } from "./settings";
 
-const STYLE_PROMPTS = {
+export const STYLE_PROMPTS = {
   clean:
     "Transkribiere die handschriftlichen Notizen in den angehängten Bildern/PDF-Seiten in sauberes Obsidian-Markdown. " +
     "Übernimm die Struktur: Überschriften als #-Überschriften, Aufzählungen als Listen, Pfeile als „→“, Tabellen als Markdown-Tabellen, " +

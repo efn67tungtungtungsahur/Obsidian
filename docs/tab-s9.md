@@ -47,8 +47,8 @@ Beim ersten Start fragt Obsidian, wo der Vault (dein Notiz-Ordner) liegen soll:
 
 Installiere jetzt (in der Suche den Namen eintippen; die Links zeigen die Plugin-Seiten im offiziellen [Plugin-Verzeichnis](https://community.obsidian.md/plugins)):
 
-1. **[Excalidraw](https://community.obsidian.md/plugins/obsidian-excalidraw-plugin)**: zum handschriftlichen Schreiben und Zeichnen mit dem S Pen. Danach in den Excalidraw-Einstellungen unter *Export* **„Auto-export PNG“** einschalten, damit Claude deine Zeichnungen lesen kann.
-2. **[BRAT](https://community.obsidian.md/plugins/obsidian42-brat)**: damit installierst du das Plugin *Claude Research* aus GitHub.
+1. **[BRAT](https://community.obsidian.md/plugins/obsidian42-brat)** (Pflicht): damit installierst du das Plugin *Claude Notebook* aus GitHub. Es bringt **Bibliothek und handschriftliches Notizbuch** schon mit.
+2. **[Excalidraw](https://community.obsidian.md/plugins/obsidian-excalidraw-plugin)** (optional): für unendlich große Zeichenflächen, Mindmaps und Diagramme. Falls du es nutzt, in den Excalidraw-Einstellungen unter *Export* **„Auto-export PNG“** einschalten, damit Claude die Zeichnungen lesen kann.
 
 Nach der Installation jedes Plugin mit dem Schalter **aktivieren**.
 
@@ -61,13 +61,14 @@ Nach der Installation jedes Plugin mit dem Schalter **aktivieren**.
 3. Für Recherchen in der App die **Websuche** einschalten. Sie ist über das Werkzeug-Menü im Eingabefeld zu finden.
 
 > Das Plugin startet im Modus **„Ohne API“**: Es bereitet deine Frage in Obsidian vor, die Antwort schreibt Claude in der Claude-App, und du übernimmst sie mit einem Tipp.
-> Wer später alles direkt in Obsidian haben will, kann unter *Einstellungen → Claude Research → Modus* auf **„Mit API-Schlüssel“** umstellen. Das kostet extra, siehe README.
+> Wer später alles direkt in Obsidian haben will, kann unter *Einstellungen → Claude Notebook → Modus* auf **„Mit API-Schlüssel“** umstellen. Das kostet extra, siehe README.
 
-## Schritt 5: Claude Research installieren
+## Schritt 5: Claude Notebook installieren
 
 1. In Obsidian: *Einstellungen → BRAT → Add Beta plugin*.
 2. Eintragen: `efn67tungtungtungsahur/Obsidian` → **Add Plugin**. Das Repository ist öffentlich, ein GitHub-Konto brauchst du nicht.
-3. *Einstellungen → Community-Plugins* → **Claude Research** aktivieren. Fertig, ein Schlüssel ist nicht nötig.
+3. *Einstellungen → Community-Plugins* → **Claude Notebook** aktivieren. Fertig, ein Schlüssel ist nicht nötig.
+4. Es öffnet sich die **Bibliothek**: deine Ordner und Dokumente als Raster, mit den Reitern *Dokumente*, *Favoriten*, *Zuletzt* und *GoodNotes*. Die Seitenleisten von Obsidian werden beim Start eingeklappt (abschaltbar unter *Einstellungen → Claude Notebook → Aufgeräumte Oberfläche*).
 
 ## Schritt 6: Bedienleiste einrichten (empfohlen)
 
@@ -75,10 +76,12 @@ Auf dem Tablet gibt es keinen Rechtsklick. Leg dir die wichtigsten Befehle desha
 
 1. *Einstellungen → Mobil* (Mobile) → Werkzeugleiste bzw. Toolbar-Optionen verwalten.
 2. Diese Befehle hinzufügen:
-   - **Claude Research: Chat öffnen**
-   - **Claude Research: Markierten Text recherchieren**
-   - **Claude Research: Handschrift der aktuellen Notiz transkribieren**
-   - **Claude Research: Claude-Antwort einfügen**
+   - **Claude Notebook: Bibliothek öffnen**
+   - **Claude Notebook: Neues Notizbuch**
+   - **Claude Notebook: Claude öffnen**
+   - **Claude Notebook: Markierten Text recherchieren**
+   - **Claude Notebook: Handschrift der aktuellen Notiz transkribieren**
+   - **Claude Notebook: Claude-Antwort einfügen**
 
 Alle Befehle findest du außerdem in der **Befehlspalette**: in einer Notiz von oben nach unten wischen und „Claude“ eintippen.
 
@@ -100,11 +103,16 @@ Text markieren und dann **„Markierten Text recherchieren“** aus der Werkzeug
 
 ## Schritt 7: Mit dem S Pen schreiben
 
-**Handschriftliche Notiz in Excalidraw**
+**Im eigenen Notizbuch (wie GoodNotes)**
 
-1. Neue Zeichnung anlegen: Excalidraw-Symbol in der Seitenleiste oder Befehlspalette (in einer Notiz von oben nach unten wischen) → „Excalidraw: Create new drawing …“.
-2. Den **Stift-Modus** einschalten (Stift-Symbol in der Werkzeugleiste). Dann zeichnet nur der S Pen, und mit den Fingern verschiebst und zoomst du.
-3. Losschreiben. Die Zeichnung bettest du mit `![[Name.excalidraw]]` in eine normale Notiz ein.
+1. In der Bibliothek **„+ Neu“ → „Notizbuch (Handschrift)“**: Titel, Umschlagfarbe und Papier (liniert, kariert, Punkte, Cornell, leer) wählen.
+2. Losschreiben. Nur der S Pen schreibt, **ein Finger scrollt, zwei Finger zoomen**, und der Handballen wird ignoriert.
+3. **S Pen-Taste gedrückt halten = Radierer.** Oben findest du Stift, Textmarker, Radierer, Lasso, Formen, Text, Hand und Bild, rechts Rückgängig, neue Seite, **✨ Claude** und **⋯** (PDF-Export usw.).
+4. Mit **‹** oben links geht es zurück zur Bibliothek.
+
+Alle Details stehen in [notizbuch.md](notizbuch.md).
+
+**Alternative: Excalidraw** (unendliche Leinwand): Neue Zeichnung über das Excalidraw-Symbol, dort den **Stift-Modus** einschalten.
 
 **Handschrift direkt in Text umwandeln („S Pen zu Text“)**
 
@@ -132,7 +140,7 @@ Das brauchst du nur, wenn du die Notizen auch auf Handy oder PC haben willst:
 - **Syncthing**: kostenlos, Gerät-zu-Gerät ohne Cloud. Auf Android die App **Syncthing-Fork** nutzen (aus F-Droid oder GitHub), denn die ursprüngliche Syncthing-App wird nicht mehr gepflegt. Den Vault-Ordner auf allen Geräten freigeben und in Obsidian mit „Ordner als Vault öffnen“ öffnen.
 - Google Drive, OneDrive und Dropbox synchronisiert Obsidian auf Android nicht direkt. Das geht nur über Zusatz-Apps wie *FolderSync*.
 - **Nie zwei Sync-Dienste gleichzeitig** auf denselben Vault-Ordner ansetzen, zum Beispiel Obsidian Sync und Syncthing. Das erzeugt Konflikte und doppelte Dateien.
-- Den API-Schlüssel von Claude Research trägst du auf jedem Gerät einmal ein. Er liegt im Schlüsselspeicher des Geräts, nicht im Vault.
+- Den API-Schlüssel von Claude Notebook trägst du auf jedem Gerät einmal ein. Er liegt im Schlüsselspeicher des Geräts, nicht im Vault.
 
 ---
 
@@ -146,7 +154,8 @@ Das brauchst du nur, wenn du die Notizen auch auf Handy oder PC haben willst:
 | Nach „In Claude öffnen“ ist das Eingabefeld in Claude leer | Das ist normal: Lange ins Feld tippen → **Einfügen**. Die Frage liegt in der Zwischenablage. |
 | Es erscheint ein Fenster mit dem ganzen Fragetext | Das Tablet hat das automatische Kopieren blockiert. Text lange antippen → *Alles auswählen* → *Kopieren* → „Claude öffnen“. |
 | Claude findet keine Quellen | In der Claude-App die **Websuche** einschalten. |
-| (nur API-Modus) Chat meldet „Keine Verbindung zu api.anthropic.com“, obwohl Internet da ist | *Einstellungen → Claude Research → Verbindung* auf **Kompatibel** stellen. Antworten erscheinen dann am Stück statt Wort für Wort. |
+| (nur API-Modus) Chat meldet „Keine Verbindung zu api.anthropic.com“, obwohl Internet da ist | *Einstellungen → Claude Notebook → Verbindung* auf **Kompatibel** stellen. Antworten erscheinen dann am Stück statt Wort für Wort. |
 | (nur API-Modus) „Der API-Schlüssel ist ungültig“ | Schlüssel neu kopieren, ohne Leerzeichen am Anfang oder Ende. Prüfen, ob in der Anthropic-Konsole Guthaben vorhanden ist. |
 | Claude sagt bei Excalidraw „kein PNG“ | In den Excalidraw-Einstellungen **„Auto-export PNG“** einschalten und die Zeichnung einmal neu speichern |
-| Finger malen statt zu scrollen | In Excalidraw den Stift-Modus einschalten |
+| Finger malen statt zu scrollen | Im Notizbuch rechts in der zweiten Leiste **„Nur Stift zeichnet“** einschalten. In Excalidraw den Stift-Modus einschalten. |
+| Notizbücher fehlen auf einem anderen Gerät | Bei Obsidian Sync unter *Einstellungen → Sync* **„Andere Dateitypen synchronisieren“** einschalten (`.notizbuch`-Dateien) |

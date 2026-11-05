@@ -3,6 +3,7 @@ import { Component, ItemView, MarkdownRenderer, Notice, Platform, TFile, Workspa
 import { openInClaude, preparePrompt } from "./appBridge";
 import { collectAttachments } from "./attachments";
 import { Conversation, describeError } from "./claude";
+import type { AgentContext, AppliedChange, PendingChange } from "./agentTools";
 import type ClaudeResearchPlugin from "./main";
 
 export const VIEW_TYPE_CLAUDE = "claude-research-chat";
@@ -25,6 +26,11 @@ export class ClaudeChatView extends ItemView {
   private webToggle!: HTMLInputElement;
   private noteToggle!: HTMLInputElement;
   private relatedToggle: HTMLInputElement | null = null;
+  /** Assistant message currently being written (approval cards go there). */
+  private currentMsgEl: HTMLElement | null = null;
+  private pendingApprovals = new Set<(ok: boolean) => void>();
+  /** Extra content (e.g. a notebook page image) for the next question. */
+  private extraBlocks: { blocks: BetaContentBlockParam[]; label: string } | null = null;
 
   constructor(leaf: WorkspaceLeaf, private plugin: ClaudeResearchPlugin) {
     super(leaf);
@@ -61,7 +67,9 @@ export class ClaudeChatView extends ItemView {
     }
 
     const header = root.createDiv({ cls: "claude-header" });
-    header.createSpan({ cls: "claude-title", text: "Claude-Recherche" });
+    const titleEl = header.createDiv({ cls: "claude-title" });
+    titleEl.createSpan({ text: "Claude" });
+    if (this.plugin.settings.agentEdits) titleEl.createSpan({ cls: "claude-chip", text: "arbeitet in deinen Notizen" });
     const headerButtons = header.createDiv({ cls: "claude-header-buttons" });
     this.iconButton(headerButtons, "save", "Chat als Notiz speichern", () => this.saveAsNote());
     this.iconButton(headerButtons, "plus", "Neuer Chat", () => this.newChat());
@@ -90,7 +98,10 @@ export class ClaudeChatView extends ItemView {
     this.sendBtn = inputRow.createEl("button", { cls: "mod-cta claude-send", text: "Senden" });
     this.sendBtn.addEventListener("click", () => void this.submit());
     this.stopBtn = inputRow.createEl("button", { cls: "claude-stop", text: "Stopp" });
-    this.stopBtn.addEventListener("click", () => this.conversation?.abort());
+    this.stopBtn.addEventListener("click", () => {
+      this.resolveApprovals(false);
+      this.conversation?.abort();
+    });
     this.stopBtn.hide();
 
     this.removeChild(this.chatComponent);
@@ -166,12 +177,21 @@ export class ClaudeChatView extends ItemView {
     else await this.submit();
   }
 
+  /** Asks a question with extra content blocks (API mode), e.g. the image of a notebook page. */
+  async askWithBlocks(question: string, blocks: BetaContentBlockParam[], label: string): Promise<void> {
+    this.extraBlocks = { blocks, label };
+    this.noteToggle.checked = false;
+    this.inputEl.value = question;
+    await this.submit();
+  }
+
   focusInput(opts: { includeNote?: boolean } = {}): void {
     if (opts.includeNote !== undefined) this.noteToggle.checked = opts.includeNote;
     this.inputEl.focus();
   }
 
   private newChat(): void {
+    this.resolveApprovals(false);
     this.conversation?.abort();
     this.conversation = null;
     this.transcript = [];
@@ -184,6 +204,23 @@ export class ClaudeChatView extends ItemView {
 
   private showWelcome(): void {
     const el = this.messagesEl.createDiv({ cls: "claude-welcome" });
+    if (this.plugin.settings.agentEdits) {
+      el.createEl("p", { text: "Claude sieht, was du offen hast, und arbeitet direkt in deinen Notizen – du bestätigst jede Änderung. Zum Beispiel:" });
+      const ex = el.createDiv({ cls: "claude-examples" });
+      for (const q of [
+        "Fasse diese Notiz zusammen und schreib die Zusammenfassung oben hinein.",
+        "Mach aus Seite 1 meines Notizbuchs eine saubere Notiz mit Überschriften.",
+        "Erstelle 10 Karteikarten zu dieser Mitschrift als neue Notiz.",
+        "Recherchiere den aktuellen Stand und ergänze einen Abschnitt mit Quellen.",
+      ]) {
+        const b = ex.createEl("button", { cls: "claude-example", text: q });
+        b.addEventListener("click", () => {
+          this.inputEl.value = q;
+          this.inputEl.focus();
+        });
+      }
+      return;
+    }
     el.createEl("p", { text: "Stell eine Frage – Claude sucht bei Bedarf im Web und in deinen Notizen und nennt die Quellen." });
     const ul = el.createEl("ul");
     ul.createEl("li", { text: "„Aktuelle Notiz mitschicken“ hängt Text und Handschrift (Bilder, Excalidraw, Ink, PDFs) der offenen Notiz an." });
@@ -196,7 +233,16 @@ export class ClaudeChatView extends ItemView {
     if (!question || this.busy) return;
 
     if (!this.conversation) {
-      this.conversation = new Conversation(this.app, this.plugin.settings, () => this.plugin.getApiKey(), { web: this.webToggle.checked });
+      const agent: AgentContext | null = this.plugin.settings.agentEdits
+        ? {
+            onStatus: () => undefined,
+            approve: (change) => this.requestApproval(change),
+            onApplied: (change) => this.showApplied(change),
+            activeFile: () => this.plugin.lastActiveFile(),
+            selection: () => this.plugin.lastMarkdownView?.editor.getSelection() ?? "",
+          }
+        : null;
+      this.conversation = new Conversation(this.app, this.plugin.settings, () => this.plugin.getApiKey(), { web: this.webToggle.checked, agent });
       this.messagesEl.querySelector(".claude-welcome")?.remove();
     }
     // The tool set is fixed per chat (keeps the prompt cache valid); toggling applies to a new chat.
@@ -226,6 +272,7 @@ export class ClaudeChatView extends ItemView {
     const thinking = statusEl.createDiv({ cls: "claude-status-line claude-pulse", text: "Claude denkt nach …" });
     let live = "";
 
+    this.currentMsgEl = msgEl;
     try {
       const result = await this.conversation.send(content, {
         onText: (delta) => {
@@ -260,15 +307,87 @@ export class ClaudeChatView extends ItemView {
       msgEl.createDiv({ text: describeError(err) });
       if (this.conversation.isEmpty) this.webToggle.disabled = false;
     } finally {
+      this.currentMsgEl = null;
+      this.resolveApprovals(false);
       this.setBusy(false);
       this.scrollToBottom();
     }
   }
 
+  /** Inline "Erlauben / Ablehnen" card for a change Claude wants to make. */
+  private requestApproval(change: PendingChange): Promise<boolean> {
+    if (this.plugin.settings.autoApprove) return Promise.resolve(true);
+    const host = this.currentMsgEl ?? this.messagesEl;
+    const card = host.createDiv({ cls: "claude-approval" });
+    card.createDiv({ cls: "claude-approval-title", text: change.summary });
+    if (change.before) {
+      card.createDiv({ cls: "claude-approval-label", text: "Bisher" });
+      card.createEl("pre", { cls: "claude-diff claude-diff-old", text: change.before });
+    }
+    if (change.after) {
+      card.createDiv({ cls: "claude-approval-label", text: change.kind === "edit" ? "Neu" : "Inhalt" });
+      card.createEl("pre", { cls: "claude-diff claude-diff-new", text: change.after });
+    }
+    const row = card.createDiv({ cls: "claude-approval-buttons" });
+    const no = row.createEl("button", { text: "Ablehnen" });
+    const yes = row.createEl("button", { cls: "mod-cta", text: "Erlauben" });
+    this.scrollToBottom();
+    return new Promise((resolve) => {
+      const finish = (ok: boolean) => {
+        if (!this.pendingApprovals.delete(finish)) return;
+        row.remove();
+        card.addClass(ok ? "is-approved" : "is-declined");
+        card.createDiv({ cls: "claude-approval-result", text: ok ? "Erlaubt" : "Abgelehnt" });
+        resolve(ok);
+      };
+      this.pendingApprovals.add(finish);
+      yes.addEventListener("click", () => finish(true));
+      no.addEventListener("click", () => finish(false));
+    });
+  }
+
+  private resolveApprovals(ok: boolean): void {
+    for (const finish of [...this.pendingApprovals]) finish(ok);
+  }
+
+  /** "Geändert: …  [Öffnen] [Rückgängig]" after a change was applied. */
+  private showApplied(change: AppliedChange): void {
+    const host = this.currentMsgEl ?? this.messagesEl;
+    const card = host.createDiv({ cls: "claude-applied" });
+    setIcon(card.createSpan({ cls: "claude-applied-icon" }), "check");
+    card.createSpan({ cls: "claude-applied-text", text: change.summary });
+    const open = card.createEl("button", { text: "Öffnen" });
+    open.addEventListener("click", () => {
+      const f = this.app.vault.getFileByPath(change.path);
+      if (f) void this.app.workspace.getLeaf(false).openFile(f);
+    });
+    const undo = card.createEl("button", { text: "Rückgängig" });
+    undo.addEventListener("click", async () => {
+      try {
+        await change.undo();
+        card.addClass("is-undone");
+        undo.remove();
+        open.remove();
+        card.createSpan({ cls: "claude-applied-undone", text: "– rückgängig gemacht" });
+      } catch (err) {
+        new Notice(`Rückgängig nicht möglich: ${describeError(err)}`);
+      }
+    });
+    this.scrollToBottom();
+  }
+
   /** User content: optional note context (text + handwriting/images), then the question. */
   private async buildUserContent(question: string): Promise<{ content: BetaContentBlockParam[]; contextLabel: string }> {
+    const extra = this.extraBlocks;
+    this.extraBlocks = null;
+    if (extra) return { content: [...extra.blocks, { type: "text", text: question }], contextLabel: extra.label };
     const file = this.noteToggle.checked ? this.plugin.lastActiveFile() : null;
-    if (!file) return { content: [{ type: "text", text: question }], contextLabel: "" };
+    if (!file) {
+      // The agent always gets a hint what is open, so "this note" works without a tool call.
+      const open = this.plugin.settings.agentEdits ? this.plugin.lastActiveFile() : null;
+      const hint = open ? `<kontext>Geöffnet: ${open.path}</kontext>\n\n` : "";
+      return { content: [{ type: "text", text: hint + question }], contextLabel: "" };
+    }
 
     const attachments = await collectAttachments(this.app, file);
     const blocks: BetaContentBlockParam[] = [...attachments.blocks];

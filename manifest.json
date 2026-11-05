@@ -1,9 +1,9 @@
 {
   "id": "claude-research",
-  "name": "Claude Research",
+  "name": "Claude Notebook",
   "version": "0.1.0",
   "minAppVersion": "1.11.4",
-  "description": "Chatte mit Claude direkt in Obsidian: Web-Recherche mit Quellen, Suche in deinen Notizen und Transkription von Handschrift (Excalidraw, Ink, Bilder, PDFs).",
+  "description": "Handschriftliche Notizbücher (S Pen), Bibliothek wie in GoodNotes, GoodNotes-Import und Claude – ohne API über die Claude-App oder als Assistent, der direkt in deinen Notizen arbeitet.",
   "author": "efn67tungtungtungsahur",
   "isDesktopOnly": false
 }

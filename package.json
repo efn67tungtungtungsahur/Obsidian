@@ -8,7 +8,7 @@
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "typecheck": "tsc -noEmit -skipLibCheck",
-    "test": "esbuild test/run.test.ts --bundle --platform=node --format=cjs --alias:obsidian=./test/obsidian-stub.ts --outfile=test/.out/run.test.cjs --log-level=warning && node test/.out/run.test.cjs"
+    "test": "esbuild test/run.test.ts test/notebook.test.ts --bundle --platform=node --format=cjs --alias:obsidian=./test/obsidian-stub.ts --outdir=test/.out --log-level=warning && node test/.out/run.test.js && node test/.out/notebook.test.js"
   },
   "keywords": [
     "obsidian",
@@ -22,10 +22,13 @@
     "@types/node": "^22.20.5",
     "builtin-modules": "^3.3.0",
     "esbuild": "^0.28.2",
+    "lucide": "^0.577.0",
     "obsidian": "^1.14.4",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.5.0"
+    "@anthropic-ai/sdk": "^1.5.0",
+    "fflate": "^0.8.3",
+    "perfect-freehand": "^1.2.3"
   }
 }

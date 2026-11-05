@@ -3,7 +3,7 @@
 **Kurz gesagt:** Obsidian ist eine Text-App. Handschrift kann es nicht von sich aus, Plugins rüsten sie nach. Mit einem Tablet mit Stift, also einem **Samsung Galaxy Tab mit S Pen** oder einem iPad mit Apple Pencil, kommst du damit gut an GoodNotes heran.
 
 > **Galaxy Tab S9?** Die Schritt-für-Schritt-Einrichtung für das Tab S9 steht in [tab-s9.md](tab-s9.md). Ein paar Unterschiede bleiben (siehe [Ehrlicher Vergleich](#ehrlicher-vergleich-mit-goodnotes)).
-Der große Vorteil: Mit dem Plugin **Claude Research** wird deine Handschrift **durchsuchbar, verlinkbar und recherchierbar**.
+Der große Vorteil: Mit dem Plugin **Claude Notebook** wird deine Handschrift **durchsuchbar, verlinkbar und recherchierbar**.
 
 ---
 
@@ -11,6 +11,7 @@ Der große Vorteil: Mit dem Plugin **Claude Research** wird deine Handschrift **
 
 | Weg | Gut für | Wie es sich anfühlt |
 |---|---|---|
+| **0. Eigenes Notizbuch (in diesem Plugin)** | Mitschriften wie in GoodNotes: Papiervorlagen, PDFs beschreiben, Seiten | Notizbuch mit Werkzeugleiste, S Pen-Druck, Handballen-Erkennung. Siehe [notizbuch.md](notizbuch.md) |
 | **1. Excalidraw-Plugin** | Mitschriften, Skizzen, Mindmaps, Diagramme | Unendliche Leinwand, Stift-Modus mit Handballen-Erkennung |
 | **2. Ink-Plugin** | Handschrift *mitten im Text* einer Notiz | Schreibzeilen direkt zwischen getipptem Text, sehr „Notizbuch-artig“ |
 | **3. S Pen zu Text (Samsung) / Scribble (iPad)** | Handschrift sofort in getippten Text umwandeln | Mit dem Stift in jedes Textfeld schreiben, das System wandelt es um |
@@ -101,4 +102,4 @@ Mach ein Foto und füge es in die Notiz ein. Auf dem Handy geht das über die An
 | Dateiformat | proprietär | offene Markdown- und PNG-/JSON-Dateien |
 | KI-Recherche in den Notizen | – | **mit diesem Plugin** |
 
-**Empfehlung:** Wenn das Schreiben auf Papier-Vorlagen und das PDF-Annotieren für dich zentral ist, behalte GoodNotes für das Schreiben (Weg 4) und nutze Obsidian als „zweites Gehirn“ zum Verknüpfen und Recherchieren. Für freie Mitschriften und Skizzen funktioniert **Excalidraw + Stift-Modus** gut als vollständiger Ersatz.
+**Empfehlung:** Für Mitschriften auf Papiervorlagen und zum Beschreiben von PDFs nimm das **eigene Notizbuch** (Weg 0). Für unendliche Zeichenflächen, Mindmaps und Diagramme nimm **Excalidraw**. Wenn du GoodNotes behalten willst, verbinde es über den GoodNotes-Import ([goodnotes.md](goodnotes.md)).

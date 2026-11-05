@@ -24,6 +24,21 @@ export interface ClaudeResearchSettings {
   saveFolder: string;
   transcriptionStyle: TranscriptionStyle;
   extraInstructions: string;
+  /** API mode: Claude may create/edit/move notes (each change needs approval unless autoApprove). */
+  agentEdits: boolean;
+  autoApprove: boolean;
+  // Library & notebooks
+  libraryRoot: string;
+  openLibraryOnStart: boolean;
+  tidyUi: boolean;
+  librarySort: "date" | "name";
+  favorites: string[];
+  /** null = platform default (pen only on tablets/phones). */
+  penOnly: boolean | null;
+  // GoodNotes
+  goodnotesFolder: string;
+  goodnotesCompanions: boolean;
+  goodnotesAutoImportZip: boolean;
 }
 
 export const DEFAULT_SETTINGS: ClaudeResearchSettings = {
@@ -40,6 +55,17 @@ export const DEFAULT_SETTINGS: ClaudeResearchSettings = {
   saveFolder: "Claude-Recherche",
   transcriptionStyle: "clean",
   extraInstructions: "",
+  agentEdits: true,
+  autoApprove: false,
+  libraryRoot: "",
+  openLibraryOnStart: true,
+  tidyUi: true,
+  librarySort: "date",
+  favorites: [],
+  penOnly: null,
+  goodnotesFolder: "GoodNotes",
+  goodnotesCompanions: true,
+  goodnotesAutoImportZip: true,
 };
 
 const MODEL_LABELS: Record<ModelId, string> = {
@@ -243,6 +269,100 @@ export class ClaudeResearchSettingTab extends PluginSettingTab {
             }),
         );
     }
+
+    if (s.mode === "api") {
+      new Setting(containerEl).setName("Claude arbeitet in deinen Notizen").setHeading();
+      new Setting(containerEl)
+        .setName("Claude darf Notizen anlegen und bearbeiten")
+        .setDesc("Wie das Claude-Add-in in PowerPoint: Claude sieht die offene Notiz und kann direkt schreiben, ändern, ergänzen und Dateien ordnen.")
+        .addToggle((t) =>
+          t.setValue(s.agentEdits).onChange(async (v) => {
+            s.agentEdits = v;
+            await save();
+          }),
+        );
+      new Setting(containerEl)
+        .setName("Änderungen ohne Nachfrage übernehmen")
+        .setDesc("Aus (empfohlen): Jede Änderung zeigt eine Vorschau mit „Erlauben/Ablehnen“. Rückgängig machen geht in beiden Fällen.")
+        .addToggle((t) =>
+          t.setValue(s.autoApprove).onChange(async (v) => {
+            s.autoApprove = v;
+            await save();
+          }),
+        );
+    }
+
+    new Setting(containerEl).setName("Bibliothek & Notizbücher").setHeading();
+    new Setting(containerEl)
+      .setName("Bibliothek beim Start öffnen")
+      .setDesc("Zeigt beim Öffnen von Obsidian die Dokumenten-Übersicht mit Ordnern und Notizbüchern.")
+      .addToggle((t) =>
+        t.setValue(s.openLibraryOnStart).onChange(async (v) => {
+          s.openLibraryOnStart = v;
+          await save();
+        }),
+      );
+    new Setting(containerEl)
+      .setName("Aufgeräumte Oberfläche")
+      .setDesc("Klappt beim Start die Seitenleisten von Obsidian ein. Öffnen kannst du sie weiterhin jederzeit.")
+      .addToggle((t) =>
+        t.setValue(s.tidyUi).onChange(async (v) => {
+          s.tidyUi = v;
+          await save();
+        }),
+      );
+    new Setting(containerEl)
+      .setName("Bibliothek-Ordner")
+      .setDesc("Leer = ganzer Vault. Sonst nur dieser Ordner, z. B. „Notizbücher“.")
+      .addText((t) =>
+        t.setPlaceholder("(ganzer Vault)").setValue(s.libraryRoot).onChange(async (v) => {
+          s.libraryRoot = v.trim().replace(/^\/+|\/+$/g, "");
+          await save();
+        }),
+      );
+    new Setting(containerEl)
+      .setName("Nur der Stift zeichnet")
+      .setDesc("An: Finger scrollen und zoomen, Handballen werden ignoriert. Standard: an auf Tablets, aus am Computer.")
+      .addDropdown((d) =>
+        d
+          .addOption("auto", "Automatisch")
+          .addOption("on", "An")
+          .addOption("off", "Aus")
+          .setValue(s.penOnly === null ? "auto" : s.penOnly ? "on" : "off")
+          .onChange(async (v) => {
+            s.penOnly = v === "auto" ? null : v === "on";
+            await save();
+          }),
+      );
+
+    new Setting(containerEl).setName("GoodNotes").setHeading();
+    new Setting(containerEl)
+      .setName("GoodNotes-Ordner im Vault")
+      .setDesc("Hierhin werden GoodNotes-Exporte (PDF oder ZIP eines ganzen Ordners) importiert – die Ordnerstruktur bleibt erhalten.")
+      .addText((t) =>
+        t.setPlaceholder("GoodNotes").setValue(s.goodnotesFolder).onChange(async (v) => {
+          s.goodnotesFolder = v.trim().replace(/^\/+|\/+$/g, "") || "GoodNotes";
+          await save();
+        }),
+      );
+    new Setting(containerEl)
+      .setName("Begleitnotizen anlegen")
+      .setDesc("Zu jeder GoodNotes-PDF eine Notiz für eigene Gedanken, Links, Tags und die Transkription. Wird markiert, wenn die PDF neu exportiert wurde.")
+      .addToggle((t) =>
+        t.setValue(s.goodnotesCompanions).onChange(async (v) => {
+          s.goodnotesCompanions = v;
+          await save();
+        }),
+      );
+    new Setting(containerEl)
+      .setName("ZIP-Exporte automatisch entpacken")
+      .setDesc("Speicherst du einen ZIP-Export direkt in den GoodNotes-Ordner, wird er entpackt und danach in „_Import-Archiv“ abgelegt.")
+      .addToggle((t) =>
+        t.setValue(s.goodnotesAutoImportZip).onChange(async (v) => {
+          s.goodnotesAutoImportZip = v;
+          await save();
+        }),
+      );
 
     new Setting(containerEl).setName("Persönliche Anweisungen").setHeading();
 

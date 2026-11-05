@@ -150,6 +150,8 @@ export class PasteAnswerModal extends Modal {
     private settings: ClaudeResearchSettings,
     private target: { view: MarkdownView | null; file: TFile | null },
     private question: string,
+    /** Special destination, e.g. the transcript of a notebook page. */
+    private custom: { label: string; insert: (text: string) => Promise<void> } | null = null,
   ) {
     super(app);
     // Only plain Markdown notes can take the answer (never a PDF, image or drawing file).
@@ -177,12 +179,26 @@ export class PasteAnswerModal extends Modal {
     }
 
     const s = new Setting(contentEl);
+    const custom = this.custom;
+    if (custom) {
+      s.addButton((b) =>
+        b
+          .setButtonText(custom.label)
+          .setCta()
+          .onClick(async () => {
+            const text = this.answer();
+            if (!text) return;
+            await custom.insert(text);
+            new Notice("Übernommen");
+            this.close();
+          }),
+      );
+    }
     const targetName = this.target.view?.file?.basename ?? this.target.file?.basename;
     if (targetName) {
       s.addButton((b) =>
         b
           .setButtonText(`In „${targetName}“ einfügen`)
-          .setCta()
           .onClick(() => void this.insertIntoNote()),
       );
     }
