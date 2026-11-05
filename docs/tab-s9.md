@@ -118,9 +118,11 @@ Geht auch. Exportiere die Seite als **PDF** und speichere sie in den Vault-Ordne
 
 Das brauchst du nur, wenn du die Notizen auch auf Handy oder PC haben willst:
 
-- **Obsidian Sync**: der offizielle, kostenpflichtige Dienst. Am einfachsten, Ende-zu-Ende-verschlüsselt.
+- **Obsidian Sync** (empfohlen): der offizielle, kostenpflichtige Dienst. Am einfachsten, Ende-zu-Ende-verschlüsselt, mit Versionsverlauf. Achtung: Im Tarif *Standard* werden nur Dateien bis **5 MB** synchronisiert (1 GB insgesamt). Große PDFs aus Samsung Notes oder GoodNotes brauchen den Tarif *Plus* (200 MB pro Datei, 10 GB insgesamt).
 - **Syncthing**: kostenlos, Gerät-zu-Gerät ohne Cloud. Auf Android die App **Syncthing-Fork** nutzen (aus F-Droid oder GitHub), denn die ursprüngliche Syncthing-App wird nicht mehr gepflegt. Den Vault-Ordner auf allen Geräten freigeben und in Obsidian mit „Ordner als Vault öffnen“ öffnen.
 - Google Drive, OneDrive und Dropbox synchronisiert Obsidian auf Android nicht direkt. Das geht nur über Zusatz-Apps wie *FolderSync*.
+- **Nie zwei Sync-Dienste gleichzeitig** auf denselben Vault-Ordner ansetzen, zum Beispiel Obsidian Sync und Syncthing. Das erzeugt Konflikte und doppelte Dateien.
+- Den API-Schlüssel von Claude Research trägst du auf jedem Gerät einmal ein. Er liegt im Schlüsselspeicher des Geräts, nicht im Vault.
 
 ---
 
