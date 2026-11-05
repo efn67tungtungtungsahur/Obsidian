@@ -1,0 +1,9 @@
+{
+  "id": "claude-research",
+  "name": "Claude Research",
+  "version": "0.1.0",
+  "minAppVersion": "1.11.4",
+  "description": "Chatte mit Claude direkt in Obsidian: Web-Recherche mit Quellen, Suche in deinen Notizen und Transkription von Handschrift (Excalidraw, Ink, Bilder, PDFs).",
+  "author": "efn67tungtungtungsahur",
+  "isDesktopOnly": false
+}
